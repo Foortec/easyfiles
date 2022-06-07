@@ -3,8 +3,8 @@
 /*
  * easyFiles PHP classes set
  * 
- * @copyright   Copyright (c) 2022 easyFiles (https://github.com/foortec/easyfiles/)
- * @license     MIT
+ * Copyright (c) 2022 easyFiles (https://github.com/foortec/easyfiles/)
+ * MIT
  */
 
 namespace foortec\easyFiles;
@@ -81,7 +81,7 @@ class easyUpload
     {
         if($this->saved || $this->error)
             return false;
-        $this->saved = move_uploaded_file($this->tmp, $this->savePath . "/" . $this->basename); // if false, check file permissions
+        $this->saved = move_uploaded_file($this->tmp, $this->savePath . "/" . $this->basename);
         return $this->saved;
     }
 
@@ -199,8 +199,6 @@ class easyIMG
     const notImage = "The file is not an image.";
     const noFile = "No such file, path invalid, or permission denied.";
 
-    //const EXTENSIONS = array("png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "wbmp", "xbm");
-
     public function __construct(string $path)
     {
         $this->path = htmlentities($path);
@@ -231,7 +229,7 @@ class easyIMG
         return $this->path;
     }
 
-    public function getThumb(string $thumbnailsFolder, int|string $width = 100, int|string $height = "auto") : easyThumb // "auto" means that the dimension will be automatically matched to the other dimension (it will keep the proportions); only one dimension can be set to "auto"
+    public function getThumb(string $thumbnailsFolder, ?int $width = 100, ?int $height = null) : easyThumb
     {
         return new easyThumb($thumbnailsFolder, $this->path, $width, $height);
     }
@@ -366,7 +364,7 @@ class easyThumb
         if(!$this->thumbMade)
             return false;
         
-        $imageExt = "image" . $this->extension; // variable function; must be checked if works fine with every extension
+        $imageExt = "image" . $this->extension;
         $returnValue = $imageExt($this->handle, $this->pathThumb);
         imagedestroy($this->handle);
 
@@ -508,7 +506,7 @@ class easyDoc
         echo "<br/>";
     }
 
-    private function displayRawXML() : void // using XML Expat Parser
+    private function displayRawXML() : void
     {
         $parser = xml_parser_create();
         xml_set_element_handler($parser, [$this, "xmlStart"], [$this, "xmlEnd"]);
@@ -626,7 +624,7 @@ class easyMigrate
         return false;
     }
 
-    public function import(string $delimiter = ",") : void // delimiter will be used if needed
+    public function import(string $delimiter = ",") : void
     {
         if($this->error)
             return;
@@ -828,7 +826,7 @@ class easyMigrate
         $mysqli->close();
     }
 
-    public function export(string $extension = "txt", string $delimiter = ",") : easyDoc // delimiter will be used if needed
+    public function export(string $extension = "txt", string $delimiter = ",") : easyDoc
     {
         if($this->operation != "export")
         {
@@ -971,30 +969,3 @@ class easyMigrate
         return $result->fetch_all();
     }
 }
-
-/*try
-{
-    $namespace = 'foortec\easyFiles';
-    $classes = ["easyUpload", "easyIMG", "easyThumb", "easyDoc", "easyMigrate"];
-
-    foreach($classes as $class)
-    {
-        $reflect = new ReflectionClass($namespace . "\\" . $class);
-        $methods = $reflect->getMethods();
-
-        echo "<div style='float: left; margin-right: 5px;'>- <span style='font-weight: bold;'>" . $class . "</span>:<br/> <pre>";
-        foreach($methods as $method)
-        {
-            echo "  - ";
-            echo $method->isPublic()? "<span style='color: green;'>public " : ($method->isProtected()? "<span style='color: blue;'>protected " : "<span style='color: red;'>private ");
-            echo "</span>";
-            echo ($method->isConstructor() || $method->isDestructor())? "<span style='color: #b36b00;'>" : "<span style='color: #111;'>";
-            echo $method->name . "</span><br/>";
-        }
-        echo "</pre></div>";
-    }
-}
-catch(Throwable $t)
-{
-    echo $t->getMessage() . " on line " . $t->getLine();
-}*/
