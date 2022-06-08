@@ -4,6 +4,7 @@ A set of classes designed to help you upload images and documents, display them,
 ## Classes and their public methods
 
 ### easyUpload
+<br/><br/>
 #### __construct
 <br/>**Description**
 
@@ -115,7 +116,7 @@ catch(Throwable $t)
   echo $t->getCode() . ". " . $t->getMessage();
 }
 ```
-
+<br/><br/>
 #### save
 <br/>**Description**
 
@@ -173,9 +174,16 @@ catch(Throwable $t)
 }
 ```
 
+<br/><br/>
 #### getFullPath
+
+<br/><br/>
 #### getIMG
+
+<br/><br/>
 #### getDoc
+
+<br/><br/>
 #### getType
 
 ### easyIMG
