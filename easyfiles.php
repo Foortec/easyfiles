@@ -166,13 +166,17 @@ class easyUpload
         return false;
     }
 
-    public function getIMG() : easyIMG
+    public function getIMG() : easyIMG|bool
     {
+        if(!$this->saved)
+            return false;
         return new easyIMG($this->getFullPath());
     }
 
-    public function getDoc() : easyDoc
+    public function getDoc() : easyDoc|bool
     {
+        if(!$this->saved)
+            return false;
         return new easyDoc($this->getFullPath());
     }
 
