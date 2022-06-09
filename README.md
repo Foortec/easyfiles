@@ -123,7 +123,7 @@ catch(Throwable $t)
 Saves the file in the desired directory.
 
 ```php
-public function save() : bool
+public function easyUpload::save() : bool
 ```
 <br/>**Return values**
 
@@ -176,20 +176,68 @@ catch(Throwable $t)
 
 <br/><br/>
 #### getFullPath
+<br/>**Description**
+
+Returns path to the saved file.
+
+```php
+public function easyUpload::getFullPath() : string|bool
+```
+<br/>**Return values**
+
+If the file is already saved (*save()* method was successfully used), a **string** containing the path to the file is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getIMG
+<br/>**Description**
+
+Returns an instance of *easyIMG* class.
+
+```php
+public function easyUpload::getIMG() : easyIMG|bool
+```
+<br/>**Return values**
+
+If the file is already saved (*save()* method was successfully used), an *easyIMG* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getDoc
+<br/>**Description**
+
+Returns an instance of *easyDoc* class.
+
+```php
+public function easyUpload::getDoc() : easyDoc|bool
+```
+<br/>**Return values**
+
+If the file is already saved (*save()* method was successfully used), an *easyDoc* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getType
+<br/>**Description**
 
+Get type of the file.
+
+```php
+public function easyUpload::getType() : string
+```
+<br/>**Return values**
+
+A "img" or "doc" **string**. Based on file's MIME type. So even if the image has ex. TXT extension, the method will return "img".
+
+<br/><br/>
 ### easyIMG
+<br/><br/>
 #### __construct
+
+<br/><br/>
 #### display
+
+<br/><br/>
 #### getFullPath
+
+<br/><br/>
 #### getThumb
 
 ### easyThumb
