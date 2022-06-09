@@ -227,35 +227,136 @@ public function easyUpload::getType() : string
 A "img" or "doc" **string**. Based on file's MIME type. So even if the image has ex. TXT extension, the method will return "img".
 
 <br/><br/>
+
 ### easyIMG
 <br/><br/>
 #### __construct
+<br/>**Description**
+
+Creates a new instance of the **easyIMG** class.
+
+```php
+public function easyIMG::__construct(string $path)
+```
+<br/>**Parameters**
+
+*path*<br/>
+A string containing path to the image.
 
 <br/><br/>
 #### display
+<br/>**Description**
+
+Displays image using HTML <img> tag.
+
+```php
+public function easyIMG::display(
+  ?string $id = NULL, 
+  ?string $class = NULL,
+  ?string $alt = NULL
+) : void
+```
+<br/>**Parameters**
+
+*id*<br/>
+An ID of the displayed image tag.<br/><br/>
+
+*class*<br/>
+A class of the displayed image tag.<br/><br/>
+
+*alt*<br/>
+An alt text of the displayed image tag.
 
 <br/><br/>
 #### getFullPath
+<br/>**Description**
+
+Returns image path.
+
+```php
+public function easyIMG::getFullPath() : string
+```
+<br/>**Return values**
+
+A **string** containing the path to the file is returned.
 
 <br/><br/>
 #### getThumb
+<br/>**Description**
+
+Returns an instance of *easyDoc* class.
+
+```php
+public function easyIMG::getThumb(
+  string $thumbnailsFolder,
+  ?int $width = 100,
+  ?int $height = NULL
+) : easyThumb
+```
+<br/>**Parameters**
+
+*thumbnailsFolder*<br/>
+Path, where the thumbnail will be saved.<br/><br/>
+
+*width*<br/>
+A.<br/><br/>
+
+*height*<br/>
+A.
+
+<br/>**Return values**
+
+An *easyThumb* **object** is returned.
+
+<br/>**Notes**
+
+Only one of the dimensions (*width* and *height*) can be set to NULL at the same time.
+
+<br/><br/>
 
 ### easyThumb
+<br/><br/>
 #### __construct
+
+<br/><br/>
 #### getFullPath
+
+<br/><br/>
 #### display
+
+<br/><br/>
 #### save
+
+<br/><br/>
 #### __destruct
 
+<br/><br/>
+
 ### easyDoc
+<br/><br/>
 #### __construct
+
+<br/><br/>
 #### displayRaw
+
+<br/><br/>
 #### getMigrate
+
+<br/><br/>
 #### getFullPath
 
+<br/><br/>
+
 ### easyMigrate
+<br/><br/>
 #### __construct
+
+<br/><br/>
 #### import
+
+<br/><br/>
 #### export
+
+<br/><br/>
 
 ## Errors
