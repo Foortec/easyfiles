@@ -566,7 +566,7 @@ class easyMigrate
     const fileIsImage = "The file is an image.";
     const wrongPath = "The file does not exist.";
     const noFileAndNoTable = "There is no file and no database table.";
-    const everythingExists = "Both database table and file exist. Conflict."; // make file appending in the future!
+    const everythingExists = "Both database table and file exist. Conflict.";
     const importImpossible = "Import operation is impossible with this set of input data.";
     const exportImpossible = "Export operation is impossible with this set of input data.";
 
