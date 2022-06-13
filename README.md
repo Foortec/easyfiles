@@ -644,7 +644,7 @@ echo $object->error? $object->errorMessage : "Everything's fine!";
 
 <br/><br/>
 
-### Eceptions
+### Exceptions
 
 Some methods throw Exceptions. This is mainly for file-reading and file-writing methods.<br/>
 The Exceptions are thrown only by methods from two classes: easyDoc and easyMigrate.
