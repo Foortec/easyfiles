@@ -1,11 +1,20 @@
 # easyFiles
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
+*A quick overview*
+[<img src="media/easyfiles-1.1.0-public-methods.png"/>]
+
+## Requirements
+
+ → **PHP** 8.1 (*probably should work with 8.0, but the code has only been tested with 8.1.6 version*)<br/>
+ → **GD library** (*[click here](https://www.php.net/manual/en/book.image) if you have never heard of it*)<br/>
+ → **MySQL** database (*for easyMigrate class to work and make sense; the code has been tested with MariaDB server type*)<br/>
+
 ## Classes and their public methods
 
 ### easyUpload
 <br/><br/>
-#### __construct
+#### __construct()
 <br/>**Description**
 
 Creates a new instance of the **easyUpload** class.
@@ -117,7 +126,7 @@ catch(Throwable $t)
 }
 ```
 <br/><br/>
-#### save
+#### save()
 <br/>**Description**
 
 Saves the file in the desired directory.
@@ -175,7 +184,7 @@ catch(Throwable $t)
 ```
 
 <br/><br/>
-#### getFullPath
+#### getFullPath()
 <br/>**Description**
 
 Returns path to the saved file.
@@ -188,7 +197,7 @@ public function easyUpload::getFullPath() : string|bool
 If the file is already saved (*save()* method was successfully used), a **string** containing the path to the file is returned. Otherwise a **false** is returned.
 
 <br/><br/>
-#### getIMG
+#### getIMG()
 <br/>**Description**
 
 Returns an instance of *easyIMG* class.
@@ -201,7 +210,7 @@ public function easyUpload::getIMG() : easyIMG|bool
 If the file is already saved (*save()* method was successfully used), an *easyIMG* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
-#### getDoc
+#### getDoc()
 <br/>**Description**
 
 Returns an instance of *easyDoc* class.
@@ -214,7 +223,7 @@ public function easyUpload::getDoc() : easyDoc|bool
 If the file is already saved (*save()* method was successfully used), an *easyDoc* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
-#### getType
+#### getType()
 <br/>**Description**
 
 Get type of the file.
@@ -227,10 +236,62 @@ public function easyUpload::getType() : string
 A "img" or "doc" **string**. Based on file's MIME type. So even if the image has ex. TXT extension, the method will return "img".
 
 <br/><br/>
+#### getBasename()
+<br/>**Description**
+
+Returns basename (filename with extension) of the file.
+
+```php
+public function easyUpload::getBasename() : string
+```
+<br/>**Return values**
+
+A **string** containing the basename is returned. If the basename have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getFilename()
+<br/>**Description**
+
+Returns filename.
+
+```php
+public function easyUpload::getFilename() : string
+```
+<br/>**Return values**
+
+A **string** containing the filename is returned. If the filename have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getExtension()
+<br/>**Description**
+
+Returns extension of the file.
+
+```php
+public function easyUpload::getExtension() : string
+```
+<br/>**Return values**
+
+A **string** containing the extension is returned. If the extension have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getSize()
+<br/>**Description**
+
+Returns size of the file in bytes.
+
+```php
+public function easyUpload::getSize() : int
+```
+<br/>**Return values**
+
+An **integer** size is returned (in bytes). The file does not need to be saved (with *save()* method) to get its size.
+
+<br/><br/>
 
 ### easyIMG
 <br/><br/>
-#### __construct
+#### __construct()
 <br/>**Description**
 
 Creates a new instance of the **easyIMG** class.
@@ -244,7 +305,7 @@ public function easyIMG::__construct(string $path)
 A string containing path to the image.
 
 <br/><br/>
-#### display
+#### display()
 <br/>**Description**
 
 Displays image using HTML <img> tag.
@@ -268,7 +329,7 @@ A class of the displayed image tag.<br/><br/>
 An alt text of the displayed image tag.
 
 <br/><br/>
-#### getFullPath
+#### getFullPath()
 <br/>**Description**
 
 Returns image path.
@@ -281,7 +342,7 @@ public function easyIMG::getFullPath() : string
 A **string** containing the path to the file is returned.
 
 <br/><br/>
-#### getThumb
+#### getThumb()
 <br/>**Description**
 
 Returns an instance of *easyDoc* class.
@@ -313,29 +374,93 @@ An *easyThumb* **object** is returned.
 Only one of the dimensions (*width* and *height*) can be set to NULL at the same time.
 
 <br/><br/>
+#### getBasename()
+<br/>**Description**
+
+Returns basename (filename with extension) of the image.
+
+```php
+public function easyIMG::getBasename() : string
+```
+<br/>**Return values**
+
+A **string** containing the basename is returned. If the basename have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getFilename()
+<br/>**Description**
+
+Returns filename.
+
+```php
+public function easyIMG::getFilename() : string
+```
+<br/>**Return values**
+
+A **string** containing the filename is returned. If the filename have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getExtension()
+<br/>**Description**
+
+Returns extension of the image.
+
+```php
+public function easyIMG::getExtension() : string
+```
+<br/>**Return values**
+
+A **string** containing the extension is returned. If the extension have not been initialized, an empty string is returned.
+
+<br/><br/>
+#### getSize()
+<br/>**Description**
+
+Returns size of the image in bytes.
+
+```php
+public function easyIMG::getSize() : int
+```
+<br/>**Return values**
+
+An **integer** size is returned (in bytes).
+
+<br/><br/>
 
 ### easyThumb
 <br/><br/>
-#### __construct
+#### __construct()
 <br/>**Description**
 
 Creates a new instance of the **easyThumb** class.
 
 ```php
 public function easyThumb::__construct(
+  string $prefix = "thumb-",
+  ?string $filename = null,
   string $pathThumb,
   string $pathIMG,
-  ?int $width = 100,
-  ?int $height = NULL
+  ?int $maxDimension = 100,
+  ?int $width = null,
+  ?int $height = null
 )
 ```
 <br/>**Parameters**
+
+*prefix*<br/>
+Thumbnail filename prefix.<br/><br/>
+
+*filename*<br/>
+Thumbnail filename. If leaved NULL, the filename will be the same as the target image's filename.<br/><br/>
 
 *pathThumb*<br/>
 Path, where the thumbnail will be saved.<br/><br/>
 
 *pathIMG*<br/>
 Path to the image.<br/><br/>
+
+*maxDimension*<br/>
+Measurement of the longest dimension of an image (in pixels). The second dimension will be calculated according to aspect ratio.<br/><br/>
 
 *width*<br/>
 Thumbnail's with in pixels. It will be calculated according to aspect ratio if set to NULL (while *height* is not NULL).<br/><br/>
@@ -345,10 +470,10 @@ Thumbnail's height in pixels. It will be calculated according to aspect ratio if
 
 <br/>**Notes**
 
-Only one of the dimensions (*width* and *height*) can be set to NULL at the same time.
+If *maxDimension* is not NULL, *width* and *height* must be set to NULL. If *maxDimension* is NULL, maximally one of the *width* and *height* can be NULL. Otherwise there will be a conflict, the constructor will not know which dimensions to use.
 
 <br/><br/>
-#### getFullPath
+#### getFullPath()
 <br/>**Description**
 
 Returns thumbnail path.
@@ -361,7 +486,7 @@ public function easyThumb::getFullPath() : string
 A **string** containing the path to the thumbnail is returned.
 
 <br/><br/>
-#### display
+#### display()
 <br/>**Description**
 
 Displays thumbnail using HTML <img> tag.
@@ -389,20 +514,77 @@ An alt text of the displayed image tag.
 The thumbnail does not need to be saved to display it.
 
 <br/><br/>
-#### save
+#### save()
 <br/>**Description**
 
 Saves thumbnail.
 
 ```php
-public function easyThumb::save() : bool
+public function easyThumb::save(?string $extension = null) : bool
 ```
+<br/>**Parameters**
+
+*extension*<br/>
+Output thumbnail extension.<br/><br/>
+
 <br/>**Return values**
 
 Returns **true** on success and **false** on failure. **False** can also mean that the thumbnail is not created (an error occurred in the constructor) or permission denied.
 
 <br/><br/>
-#### __destruct
+#### getBasename()
+<br/>**Description**
+
+Returns basename (filename with extension) of the thumbnail.
+
+```php
+public function easyThumb::getBasename() : string
+```
+<br/>**Return values**
+
+A **string** containing the basename is returned.
+
+<br/><br/>
+#### getFilename()
+<br/>**Description**
+
+Returns filename.
+
+```php
+public function easyThumb::getFilename() : string
+```
+<br/>**Return values**
+
+A **string** containing the filename is returned.
+
+<br/><br/>
+#### getExtension()
+<br/>**Description**
+
+Returns extension of the thumbnail.
+
+```php
+public function easyThumb::getExtension() : string
+```
+<br/>**Return values**
+
+A **string** containing the extension is returned.
+
+<br/><br/>
+#### getSize()
+<br/>**Description**
+
+Returns size of the saved thumbnail in bytes.
+
+```php
+public function easyThumb::getSize() : int|bool
+```
+<br/>**Return values**
+
+An **integer** size is returned (in bytes). Returns **false** if the thumbnail has not been saved (*save()* method).
+
+<br/><br/>
+#### __destruct()
 <br/>**Description**
 
 Destructs a **easyThumb** class object.
@@ -415,7 +597,7 @@ public function easyThumb::__destruct()
 
 ### easyDoc
 <br/><br/>
-#### __construct
+#### __construct()
 <br/>**Description**
 
 Creates a new instance of the **easyDoc** class.
@@ -429,7 +611,7 @@ public function easyDoc::__construct(string $path)
 Path to the document.
 
 <br/><br/>
-#### displayRaw
+#### displayRaw()
 <br/>**Description**
 
 Displays unformatted content of the file.<br/>
@@ -440,7 +622,7 @@ public function easyDoc::displayRaw() : void
 ```
 
 <br/><br/>
-#### getMigrate
+#### getMigrate()
 <br/>**Description**
 
 Returns an instance of **easyMigrate** class.
@@ -498,7 +680,7 @@ An *easyMigrate* **object** is returned.
 The object created via *getMigrate()* method can only be used to import the file to the database, because right now there is no possibility of appending files. So if you want to export the file, you should use *easyMigrate::__construct()* method.
 
 <br/><br/>
-#### getFullPath
+#### getFullPath()
 <br/>**Description**
 
 Returns document path.
@@ -511,10 +693,62 @@ public function easyDoc::getFullPath() : string
 A **string** containing the path to the document is returned.
 
 <br/><br/>
+#### getBasename()
+<br/>**Description**
+
+Returns basename (filename with extension) of the file.
+
+```php
+public function easyDoc::getBasename() : string
+```
+<br/>**Return values**
+
+A **string** containing the basename is returned.
+
+<br/><br/>
+#### getFilename()
+<br/>**Description**
+
+Returns filename.
+
+```php
+public function easyDoc::getFilename() : string
+```
+<br/>**Return values**
+
+A **string** containing the filename is returned.
+
+<br/><br/>
+#### getExtension()
+<br/>**Description**
+
+Returns extension of the file.
+
+```php
+public function easyDoc::getExtension() : string
+```
+<br/>**Return values**
+
+A **string** containing the extension is returned.
+
+<br/><br/>
+#### getSize()
+<br/>**Description**
+
+Returns size of the file in bytes.
+
+```php
+public function easyDoc::getSize() : int
+```
+<br/>**Return values**
+
+An **integer** size is returned (in bytes).
+
+<br/><br/>
 
 ### easyMigrate
 <br/><br/>
-#### __construct
+#### __construct()
 <br/>**Description**
 
 Creates a new instance of **easyMigrate** class.
@@ -572,7 +806,7 @@ define("MYSQLI_SOCKET", ini_get("mysqli.default_socket"));
 The *path* and the *tableName* arguments define what is possible to do: import or export. If *path* will lead to a directory and the *tableName* will be a name of a existing table, only export will be possible. If *path* will lead to a file and the *tableName* will be a name of a non-exisiting table, only import will be possible. In other cases an error will occur.
 
 <br/><br/>
-#### import
+#### import()
 <br/>**Description**
 
 Imports the document to the database.
@@ -590,24 +824,32 @@ A sign separating bits of data in the file. The *import()* method may use it or 
 If import is not possible (see **Notes** for *easyMigrate::__construct()*) an error will occur.
 
 <br/><br/>
-#### export
+#### export()
 <br/>**Description**
 
 Exports the document from the database.
 
 ```php
 public function easyMigrate::export(
+  ?string $filename = null,
   string $extension = "txt",
   string $delimiter = ","
-) : easyDoc
+) : easyDoc|bool
 ```
 <br/>**Parameters**
+
+*filename*<br/>
+Output file name. If set to NULL, the filename will be the same as database table name.<br/><br/>
 
 *extension*<br/>
 Output file extension.<br/><br/>
 
 *delimiter*<br/>
 A sign separating bits of data in the file. The *export()* method may use it or not. Ex. if the *extension* will be set to XML, the *delimiter* will not be used.
+
+<br/>**Return values**
+
+An *easyDoc* **object** is returned on success, **false** on failure or if an error occurred in the constructor. 
 
 <br/>**Notes**
 
@@ -646,5 +888,4 @@ echo $object->error? $object->errorMessage : "Everything's fine!";
 
 ### Exceptions
 
-Some methods throw Exceptions. This is mainly for file-reading and file-writing methods.<br/>
-The Exceptions are thrown only by methods from two classes: easyDoc and easyMigrate.
+Some methods throw Exceptions. This is mainly for database-connecting methods (*easyMigrate* class).<br/>
