@@ -8,7 +8,7 @@
  */
 
 namespace foortec\easyFiles;
-use finfo, Exception, XMLParser, GdImage, mysqli;
+use finfo, XMLParser, GdImage, mysqli;
 
 // MYSQLI database connection configuration
 define("MYSQLI_HOSTNAME", "localhost");
@@ -77,6 +77,12 @@ class easyUpload
         $this->basename = $this->filename . "." . $this->extension;
     }
 
+    private function error(string $message = "Unknown error.") : void
+    {
+        $this->error = true;
+        $this->errorMessage = $message;
+    }
+
     public function save() : bool
     {
         if($this->saved || $this->error)
@@ -92,28 +98,24 @@ class easyUpload
 
         if($this->tmp == "")
         {
-            $this->error = true;
-            $this->errorMessage = self::fileToUploadError;
+            $this->error(self::fileToUploadError);
             return;
         }
 
         if(!is_dir($this->savePath))
         {
-            $this->error = true;
-            $this->errorMessage = self::notDirectory;
+            $this->error(self::notDirectory);
             return;
         }
         
         if($this->size < $this->minSize)
         {
-            $this->error = true;
-            $this->errorMessage = self::toSmallMsg;
+            $this->error(self::toSmallMsg);
             return;
         }
         if($this->size > $this->maxSize)
         {
-            $this->error = true;
-            $this->errorMessage = self::toBigMsg;
+            $this->error(self::toBigMsg);
             return;
         }
 
@@ -127,12 +129,7 @@ class easyUpload
             }
         }
         if(!$extensionOK)
-        {
-            $this->error = true;
-            $this->errorMessage = self::invalidExtMsg;
-            return;
-        }
-        unset($extensionOK);
+            $this->error(self::invalidExtMsg);
     }
 
     private function randomFilename(?string $prefix = "file", ?string $name = null) : string
@@ -190,6 +187,34 @@ class easyUpload
             return "doc";
         return "img";
     }
+
+    public function getBasename() : string
+    {
+        if(isset($this->basename))
+            return $this->basename;
+        return "";
+    }
+
+    public function getFilename() : string
+    {
+        if(isset($this->filename))
+            return $this->filename;
+        return "";
+    }
+
+    public function getExtension() : string
+    {
+        if(isset($this->extension))
+            return $this->extension;
+        return "";
+    }
+
+    public function getSize() : int
+    {
+        if($this->saved)
+            return filesize($this->getFullPath());
+        return filesize($this->tmp);
+    }
 }
 
 class easyIMG
@@ -197,6 +222,9 @@ class easyIMG
     use checks;
 
     private string $path;
+    private string $filename;
+    private string $basename;
+    private string $extension;
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
@@ -209,16 +237,25 @@ class easyIMG
         
         if(!file_exists($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::noFile;
+            $this->error(self::noFile);
             return;
         }
 
         if(!$this->fileIsImage($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::notImage;
+            $this->error(self::notImage);
+            return;
         }
+
+        $this->filename = pathinfo($this->path, PATHINFO_FILENAME);
+        $this->basename = pathinfo($this->path, PATHINFO_BASENAME);
+        $this->extension = pathinfo($this->path, PATHINFO_EXTENSION);
+    }
+
+    private function error(string $message = "Unknown error.") : void
+    {
+        $this->error = true;
+        $this->errorMessage = $message;
     }
 
     public function display(?string $id=NULL, ?string $class=NULL, ?string $alt=NULL) : void
@@ -233,9 +270,35 @@ class easyIMG
         return $this->path;
     }
 
-    public function getThumb(string $thumbnailsFolder, ?int $width = 100, ?int $height = null) : easyThumb
+    public function getThumb(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null) : easyThumb
     {
-        return new easyThumb($thumbnailsFolder, $this->path, $width, $height);
+        return new easyThumb($prefix, $filename, $pathThumb, $this->path, $maxDimension, $width, $height);
+    }
+
+    public function getBasename() : string
+    {
+        if(isset($this->basename))
+            return $this->basename;
+        return "";
+    }
+
+    public function getFilename() : string
+    {
+        if(isset($this->filename))
+            return $this->filename;
+        return "";
+    }
+
+    public function getExtension() : string
+    {
+        if(isset($this->extension))
+            return $this->extension;
+        return "";
+    }
+
+    public function getSize() : int
+    {
+        return filesize($this->path);
     }
 }
 
@@ -250,8 +313,8 @@ class easyThumb
     private string $filename;
     private ?int $width;
     private ?int $height;
+    private ?int $maxDimension;
 
-    const prefix = "thumb-";
     private bool $saved = false;
     private bool $thumbMade = false;
 
@@ -259,68 +322,101 @@ class easyThumb
     public ?string $errorMessage = NULL;
     const notImage = "The file is not an image.";
     const noFile = "No such file, path invalid, or permission denied.";
-    const autoDimensions = "Maximally one dimension can be NULL.";
+    const noDimensions = "Unspecified dimensions.";
+    const dimensionsConflict = "Given to many dimensions. Conflict.";
     const notDirectory = "The path does not lead to a directory.";
 
-    public function __construct(string $pathThumb, string $pathIMG, ?int $width = 100, ?int $height = null)
+    public function __construct(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null)
     {
         $this->pathIMG = htmlentities($pathIMG);
         $this->pathThumb = preg_replace(";\/$;", "", htmlentities($pathThumb));
 
         if(!is_dir($this->pathThumb))
         {
-            $this->error = true;
-            $this->errorMessage = self::notDirectory;
+            $this->error(self::notDirectory);
             return;
         }
 
+        if(is_null($filename))
+            $this->filename = pathinfo($this->pathIMG, PATHINFO_FILENAME);
+        else
+            $this->filename = $filename;
+
         $this->extension = strtolower(pathinfo($this->pathIMG, PATHINFO_EXTENSION));
+        $this->filename = $prefix . $this->filename;
         
-        $this->filename = self::prefix . pathinfo($this->pathIMG, PATHINFO_FILENAME);
-        
-        $this->pathThumb = $this->pathThumb . "/" . $this->filename . "." . $this->extension;
-        
+        $this->maxDimension = $maxDimension;
         $this->width = $width;
         $this->height = $height;
 
-        if($this->width == null && $this->height == null)
-        {
-            $this->error = true;
-            $this->errorMessage = self::autoDimensions;
+        $this->checkRequirements();
+        if($this->error)
             return;
-        }
 
+        $this->makeThumb();
+    }
+
+    private function error(string $message = "Unknown error.") : void
+    {
+        $this->error = true;
+        $this->errorMessage = $message;
+    }
+
+    private function checkRequirements() : void
+    {
         if(!file_exists($this->pathIMG))
         {
-            $this->error = true;
-            $this->errorMessage = self::noFile;
+            $this->error(self::noFile);
             return;
         }
 
         if(!$this->fileIsImage($this->pathIMG))
         {
-            $this->error = true;
-            $this->errorMessage = self::notImage;
+            $this->error(self::notImage);
             return;
         }
 
-        $this->makeThumb();
+        if(is_null($this->maxDimension) && is_null($this->width) && is_null($this->height))
+        {
+            $this->error(self::noDimensions);
+            return;
+        }
+
+        if(!is_null($this->maxDimension) && (!is_null($this->width) || !is_null($this->height)))
+            $this->error(self::dimensionsConflict);
     }
 
     private function calcDimensions(int $widthIMG, int $heightIMG) : void
     {
-        if($this->width != null && $this->height != null)
+        if(!is_null($this->maxDimension))
+        {
+            if($widthIMG == $heightIMG)
+            {
+                $this->width = $this->maxDimension;
+                $this->height = $this->maxDimension;
+                return;
+            }
+
+            if($widthIMG > $heightIMG)
+            {
+                $this->width = $this->maxDimension;
+                $this->height = round(($this->width/$widthIMG) * $heightIMG);
+                return;
+            }
+            $this->height = $this->maxDimension;
+            $this->width = round(($this->height/$heightIMG) * $widthIMG);
+            return;
+        }
+
+        if(!is_null($this->width) && !is_null($this->height))
             return;
 
-        if($this->width != null)
+        if(!is_null($this->width))
         {
             $this->height = round(($this->width/$widthIMG) * $heightIMG);
             return;
         }
-        if($this->height != null)
-        {
-            $this->width = round(($this->height/$heightIMG) * $widthIMG);
-        }
+        $this->width = round(($this->height/$heightIMG) * $widthIMG);
     }
 
     private function makeThumb() : void
@@ -363,17 +459,48 @@ class easyThumb
 		echo '<img id="' . $id . '" class="' . $class . '" src="data:image/png;base64,' . base64_encode($rawImageStream) . '" alt="' . $alt . '">';
     }
 
-    public function save() : bool
+    public function save(?string $extension = null) : bool
     {
         if(!$this->thumbMade)
             return false;
         
-        $imageExt = "image" . $this->extension;
-        $returnValue = $imageExt($this->handle, $this->pathThumb);
-        imagedestroy($this->handle);
+        if(!is_null($extension))
+        {
+            $this->extension = $extension;
+            $this->pathThumb = $this->pathThumb . "/" . $this->filename . "." . $this->extension;
+        }
 
-        $this->saved = true;
-        return $returnValue;
+        if($this->extension == "jpg")
+            $ext = "jpeg";
+        else
+            $ext = $this->extension;
+        
+        $imageExt = "image" . $ext;
+        $this->saved = $imageExt($this->handle, $this->pathThumb);
+        imagedestroy($this->handle);
+        return $this->saved;
+    }
+
+    public function getBasename() : string
+    {
+        return $this->filename . "." . $this->extension;
+    }
+
+    public function getFilename() : string
+    {
+        return $this->filename;
+    }
+
+    public function getExtension() : string
+    {
+        return $this->extension;
+    }
+
+    public function getSize() : int|bool
+    {
+        if($this->saved)
+            return filesize($this->getFullPath());
+        return false;
     }
 
     public function __destruct()
@@ -389,38 +516,46 @@ class easyDoc
 
     private string $path;
     private string $extension;
+    private string $basename;
+    private string $filename;
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
     const noFile = "No such file.";
     const fileIsImage = "The file is an image.";
     const isDirectory = "The file is a directory.";
+    const fileReadError = "The file is missing or permission denied.";
 
     public function __construct(string $path)
     {
         $this->path = htmlentities($path);
         $this->extension = strtolower(pathinfo($this->path, PATHINFO_EXTENSION));
+        $this->basename = strtolower(pathinfo($this->path, PATHINFO_BASENAME));
+        $this->filename = strtolower(pathinfo($this->path, PATHINFO_FILENAME));
 
         if(!file_exists($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::noFile;
+            $this->error(self::noFile);
             return;
         }
 
         if(is_dir($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::isDirectory;
+            $this->error(self::isDirectory);
             return;
         }
 
         if($this->fileIsImage($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::fileIsImage;
+            $this->error(self::fileIsImage);
             return;
         }
+    }
+
+    private function error(string $message = "Unknown error.") : void
+    {
+        $this->error = true;
+        $this->errorMessage = $message;
     }
 
     public function displayRaw() : void
@@ -453,7 +588,7 @@ class easyDoc
 
     private function displayrawCSV() : void
     {
-        $csv = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $csv = fopen($this->path, "r") or $this->error(self::fileReadError);
         while($line = fgetcsv($csv))
         {
             foreach($line as $cell)
@@ -470,7 +605,7 @@ class easyDoc
 
     private function displayRawJSON() : void
     {
-        $file = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $file = fopen($this->path, "r") or $this->error(self::fileReadError);
         $json = fread($file, filesize($this->path));
         fclose($file);
         $array = json_decode($json, true);
@@ -484,7 +619,7 @@ class easyDoc
 
     private function displayRawTXT() : void
     {
-        $txtHandle = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $txtHandle = fopen($this->path, "r") or $this->error(self::fileReadError);
         $txtArray = explode("/r/n", fread($txtHandle, filesize($this->path)));
         fclose($txtHandle);
         foreach($txtArray as $line)
@@ -515,11 +650,11 @@ class easyDoc
         $parser = xml_parser_create();
         xml_set_element_handler($parser, [$this, "xmlStart"], [$this, "xmlEnd"]);
 
-        $file = fopen($this->path, "r") or throw new Exception("The file is missing or permission denied.");
+        $file = fopen($this->path, "r") or $this->error(self::fileReadError);
         while(!feof($file))
         {
             $line = fgets($file);
-            xml_parse($parser, $line) or throw new Exception("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
+            xml_parse($parser, $line) or $this->error("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
         }
         fclose($file);
         xml_parser_free($parser);
@@ -533,6 +668,26 @@ class easyDoc
     public function getFullPath() : string
     {
         return $this->path;
+    }
+
+    public function getBasename() : string
+    {
+        return $this->basename;
+    }
+
+    public function getFilename() : string
+    {
+        return $this->filename;
+    }
+
+    public function getExtension() : string
+    {
+        return $this->extension;
+    }
+
+    public function getSize() : int
+    {
+        return filesize($this->path);
     }
 }
 
@@ -563,12 +718,16 @@ class easyMigrate
     public bool $error = false;
     public ?string $errorMessage = NULL;
     const tableExists = "The table already exists.";
+    const fileExists = "The file already exists.";
     const fileIsImage = "The file is an image.";
     const wrongPath = "The file does not exist.";
+    const fileReadError = "The file is missing or permission denied.";
+    const fileCreateError = "The file can not be created.";
     const noFileAndNoTable = "There is no file and no database table.";
     const everythingExists = "Both database table and file exist. Conflict.";
     const importImpossible = "Import operation is impossible with this set of input data.";
     const exportImpossible = "Export operation is impossible with this set of input data.";
+    const mysqliConnectionError = "Database connection failure.";
 
     public function __construct(string $path, string $tableName, string $hostname = MYSQLI_HOSTNAME, string $username = MYSQLI_USERNAME, string $password = MYSQLI_PASSWORD, string $database = MYSQLI_DATABASE, string $port = MYSQLI_PORT, string $socket = MYSQLI_SOCKET)
     {
@@ -584,8 +743,7 @@ class easyMigrate
 
         if(!file_exists($this->path))
         {
-            $this->error = true;
-            $this->errorMessage = self::wrongPath;
+            $this->error(self::wrongPath);
             return;
         }
 
@@ -599,15 +757,13 @@ class easyMigrate
                 return;
             }
 
-            $this->error = true;
-            $this->errorMessage = self::noFileAndNoTable;
+            $this->error(self::noFileAndNoTable);
             return;
         }
 
         if($this->tableExists)
         {
-            $this->error = true;
-            $this->errorMessage = self::everythingExists;
+            $this->error(self::everythingExists);
             return;
         }
 
@@ -619,13 +775,19 @@ class easyMigrate
     {
         $checkQuery = 'SHOW TABLES LIKE "' . $this->tableName . '";';
         
-        $mysqli = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET);
+        $mysqli = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET) or $this->error(self::mysqliConnectionError);
         $result = $mysqli->query($checkQuery);
         $mysqli->close();
 
         if($result->num_rows !== 0)
             return true;
         return false;
+    }
+
+    private function error(string $message = "Unknown error.") : void
+    {
+        $this->error = true;
+        $this->errorMessage = $message;
     }
 
     public function import(string $delimiter = ",") : void
@@ -635,8 +797,7 @@ class easyMigrate
 
         if($this->operation != "import")
         {
-            $this->error = true;
-            $this->errorMessage = self::importImpossible;
+            $this->error(self::importImpossible);
             return;
         }
 
@@ -666,11 +827,15 @@ class easyMigrate
         $parser = xml_parser_create();
         xml_set_element_handler($parser, [$this, "xmlStart"], [$this, "xmlEnd"]);
 
-        $file = fopen($this->path, "r") or throw new Exception("The file is missing or permission denied.");
+        $file = fopen($this->path, "r") or $this->error(self::fileReadError);
+        if($this->error)
+            return;
         while(!feof($file))
         {
             $line = fgets($file);
-            xml_parse($parser, $line) or throw new Exception("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
+            xml_parse($parser, $line) or $this->error("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
+            if($this->error)
+                return;
         }
         fclose($file);
         xml_parser_free($parser);
@@ -705,7 +870,9 @@ class easyMigrate
 
     private function importJSON() : void
     {
-        $jsonHandle = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $jsonHandle = fopen($this->path, "r") or $this->error(self::fileReadError);
+        if($this->error)
+            return;
         $json = fread($jsonHandle, filesize($this->path));
         fclose($jsonHandle);
 
@@ -727,7 +894,9 @@ class easyMigrate
 
     private function importCSV(string $delimiter) : void
     {
-        $csvHandle = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $csvHandle = fopen($this->path, "r") or $this->error(self::fileReadError);
+        if($this->error)
+            return;
         $rowIter = 0;
         $tableColumn = array();
         while($row = fgetcsv($csvHandle, null, $delimiter))
@@ -755,7 +924,9 @@ class easyMigrate
 
     private function importTXT(string $delimiter) : void
     {
-        $txtHandle = fopen($this->path, "r") or throw new Exception("Unable to open the file.");
+        $txtHandle = fopen($this->path, "r") or $this->error(self::fileReadError);
+        if($this->error)
+            return;
         $txt = fread($txtHandle, filesize($this->path));
         $txt = str_replace("\n\r", "\n", $txt);
         $txtArray = explode("\n", $txt);
@@ -824,40 +995,59 @@ class easyMigrate
 
     private function mysqliImport(string $createTableQuery, string $insertQueries) : void
     {
-        $mysqli = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET);
+        $mysqli = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET)  or $this->error(self::mysqliConnectionError);
         $mysqli->query($createTableQuery);
         $mysqli->multi_query($insertQueries);
         $mysqli->close();
     }
 
-    public function export(string $extension = "txt", string $delimiter = ",") : easyDoc
+    public function export(?string $filename = null, string $extension = "txt", string $delimiter = ",") : easyDoc|bool
     {
+        if($this->error)
+            return false;
+
         if($this->operation != "export")
         {
-            $this->error = true;
-            $this->errorMessage = self::exportImpossible;
+            $this->error(self::exportImpossible);
+            return false;
+        }
+
+        if(is_null($filename))
+            $path = $this->path . "/" . $this->tableName . "." . $extension;
+        else
+            $path = $this->path . "/" . $filename . "." . $extension;
+        
+        if(file_exists($path))
+        {
+            $this->error(self::fileExists);
             return false;
         }
 
         if($extension == "xml")
-            return $this->exportXML();
+            return $this->exportXML($filename);
         
         if($extension == "json")
-            return $this->exportJSON();
+            return $this->exportJSON($filename);
         
         if($extension == "csv")
-            return $this->exportCSV($delimiter);
+            return $this->exportCSV($filename, $delimiter);
         
-        return $this->exportTXT($delimiter);
+        return $this->exportTXT($filename, $delimiter);
     }
 
-    private function exportXML() : easyDoc
+    private function exportXML(?string $filename = null) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
 
-        $this->path = $this->path . "/" . $this->tableName . ".xml";
-        $xmlHandle = fopen($this->path, "w") or throw new Exception("Unable to create the file.");
+        if(is_null($filename))
+            $this->path = $this->path . "/" . $this->tableName . ".xml";
+        else
+            $this->path = $this->path . "/" . $filename . ".xml";
+
+        $xmlHandle = fopen($this->path, "w") or $this->error(self::fileCreateError);
+        if($this->error)
+            return false;
         fwrite($xmlHandle, '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL);
         fwrite($xmlHandle, '<table>'.PHP_EOL);
 
@@ -885,30 +1075,42 @@ class easyMigrate
         return new easyDoc($this->path);
     }
 
-    private function exportJSON() : easyDoc
+    private function exportJSON(?string $filename = null) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
-        $this->path = $this->path . "/" . $this->tableName . ".json";
+
+        if(is_null($filename))
+            $this->path = $this->path . "/" . $this->tableName . ".json";
+        else
+        $this->path = $this->path . "/" . $filename . ".json";
 
         for($i=0; $i<count($tableRows); $i++)
             for($j=0; $j<count($tableColumns); $j++)
                 $array[$i][$tableColumns[$j]] = $tableRows[$i][$j];
 
         $json = json_encode($array);
-        $jsonHandle = fopen($this->path, "w") or throw new Exception("Unable to create the file.");
+        $jsonHandle = fopen($this->path, "w") or $this->error(self::fileCreateError);
+        if($this->error)
+            return false;
         fwrite($jsonHandle, $json);
         fclose($jsonHandle);
         return new easyDoc($this->path);
     }
 
-    private function exportCSV(string $delimiter) : easyDoc
+    private function exportCSV(?string $filename = null, string $delimiter) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
-        $this->path = $this->path . "/" . $this->tableName . ".csv";
 
-        $csvHandle = fopen($this->path, "w") or throw new Exception("Unable to create the file.");
+        if(is_null($filename))
+            $this->path = $this->path . "/" . $this->tableName . ".csv";
+        else
+            $this->path = $this->path . "/" . $filename . ".csv";
+
+        $csvHandle = fopen($this->path, "w") or $this->error(self::fileCreateError);
+        if($this->error)
+            return false;
         fputcsv($csvHandle, $tableColumns, $delimiter);
         foreach($tableRows as $row)
             fputcsv($csvHandle, $row, $delimiter);
@@ -916,13 +1118,19 @@ class easyMigrate
         return new easyDoc($this->path);
     }
 
-    private function exportTXT(string $delimiter) : easyDoc
+    private function exportTXT(?string $filename = null, string $delimiter) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
 
-        $this->path = $this->path . "/" . $this->tableName . ".txt";
-        $txtHandle = fopen($this->path, "w") or throw new Exception("Unable to create the file.");
+        if(is_null($filename))
+            $this->path = $this->path . "/" . $this->tableName . ".txt";
+        else
+            $this->path = $this->path . "/" . $filename . ".txt";
+
+        $txtHandle = fopen($this->path, "w") or $this->error(self::fileCreateError);
+        if($this->error)
+            return false;
 
         for($i=0; $i<count($tableColumns); $i++)
         {
@@ -952,7 +1160,7 @@ class easyMigrate
     {
         $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" . $this->db . "' AND TABLE_NAME = '" . $this->tableName . "';";
         
-        $conn = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET);
+        $conn = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET) or $this->error(self::mysqliConnectionError);
         $result = $conn->query($query);
         $conn->close();
         $array = $result->fetch_all();
@@ -967,7 +1175,7 @@ class easyMigrate
     {
         $query = "SELECT * FROM `" . $this->tableName . "`;";
 
-        $conn = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET);
+        $conn = new mysqli(MYSQLI_HOSTNAME, MYSQLI_USERNAME, MYSQLI_PASSWORD, MYSQLI_DATABASE, MYSQLI_PORT, MYSQLI_SOCKET) or $this->error(self::mysqliConnectionError);
         $result = $conn->query($query);
         $conn->close();
         return $result->fetch_all();
