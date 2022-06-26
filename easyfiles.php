@@ -275,27 +275,77 @@ class easyIMG
         if($ext == "jpg")
             $ext = "jpeg";
         $function_imagecreatefrom = "imagecreatefrom" . $ext;
-        if(!($gd = $function_imagecreatefrom($pathToImage)))
+        if(!function_exists($function_imagecreatefrom))
         {
             $this->error(self::imageCreateError);
             return false;
         }
-        return $gd;
+        return $function_imagecreatefrom($pathToImage);
+    }
+
+    private function calcDstCoordinates(int $dst_width, int $dst_height, int $src_width, int $src_height, string $location) : array
+    {
+        if($location == "top")
+        {
+            $dst_x = ($dst_width / 2) - ($src_width / 2);
+            $dst_y = 0;
+        }
+        elseif($location == "top-right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = 0;
+        }
+        elseif($location == "right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = ($dst_height / 2) - ($src_height / 2);
+        }
+        elseif($location == "bottom-right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "bottom")
+        {
+            $dst_x = ($dst_width / 2) - ($src_width / 2);
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "bottom-left")
+        {
+            $dst_x = 0;
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "left")
+        {
+            $dst_x = 0;
+            $dst_y = ($dst_height / 2) - ($src_height / 2);
+        }
+        elseif($location == "top-left")
+        {
+            $dst_x = 0;
+            $dst_y = 0;
+        }
+        elseif($location == "center")
+        {
+            $dst_x = ($dst_width / 2) - ($src_width / 2);
+            $dst_y = ($dst_height / 2) - ($src_height / 2);
+        }
+        else // random
+        {
+            $dst_x = rand(0, $dst_width - $src_width);
+            $dst_y = rand(0, $dst_height - $src_height);
+        }
+        return array($dst_x, $dst_y);
     }
 
     public function watermark(string $watermarkImagePath, ?string $location = "center") : void
     {
         if($this->error)
             return;
-
-        $locationOK = false;
-        foreach(self::watermarkLocations as $constLocation)
-        {
-            if($location == $constLocation)
-                $locationOK = true;
-        }
         
-        if(!$locationOK)
+        $location = strtolower($location);
+
+        if(!in_array($location, self::watermarkLocations))
         {
             $this->error(self::watermarkBadLocation);
             return;
@@ -310,59 +360,10 @@ class easyIMG
         $src_width = imagesx($watermark);
         $src_height = imagesy($watermark);
 
-        $dst_width = imagesx($iamge);
-        $dst_height = iamgesy($image);
+        $dst_width = imagesx($image);
+        $dst_height = imagesy($image);
 
-        if($location == "top")
-        {
-            $dst_x = ($dst_width / 5) - ($src_width / 5);
-            $dst_y = 0;
-        }
-        elseif($location == "top-right")
-        {
-            $dst_x = $dst_width - $src_width;
-            $dst_y = 0;
-        }
-        elseif($location == "right")
-        {
-            $dst_x = $dst_width - $src_width;
-            $dst_y = ($dst_height / 5) - ($src_height / 5);
-        }
-        elseif($location == "bottom-right")
-        {
-            $dst_x = $dst_width - $src_width;
-            $dst_y = $dst_height - $src_height;
-        }
-        elseif($location == "bottom")
-        {
-            $dst_x = ($dst_width / 5) - ($src_width / 5);
-            $dst_y = $dst_height - $src_height;
-        }
-        elseif($location == "bottom-left")
-        {
-            $dst_x = 0;
-            $dst_y = $dst_height - $src_height;
-        }
-        elseif($location == "left")
-        {
-            $dst_x = 0;
-            $dst_y = ($dst_height / 5) - ($src_height / 5);
-        }
-        elseif($location == "top-left")
-        {
-            $dst_x = 0;
-            $dst_y = 0;
-        }
-        elseif($location == "center")
-        {
-            $dst_x = ($dst_width / 5) - ($src_width / 5);
-            $dst_y = ($dst_height / 5) - ($src_height / 5);
-        }
-        else // random
-        {
-            $dst_x = rand(0, $dst_width - $src_width);
-            $dst_y = rand(0, $dst_height - $src_height);
-        }
+        list($dst_x, $dst_y) = $this->calcDstCoordinates($dst_width, $dst_height, $src_width, $src_height, $location);
 
         imagecopy($image, $watermark, $dst_x, $dst_y, $src_x, $src_y, $src_width, $src_height);
 
