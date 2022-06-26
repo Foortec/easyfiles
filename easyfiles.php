@@ -4,7 +4,7 @@
  * easyFiles PHP classes set
  * 
  * Copyright (c) 2022 easyFiles (https://github.com/foortec/easyfiles/)
- * MIT
+ * MIT License
  */
 
 namespace foortec\easyFiles;
@@ -230,6 +230,10 @@ class easyIMG
     public ?string $errorMessage = NULL;
     const notImage = "The file is not an image.";
     const noFile = "No such file, path invalid, or permission denied.";
+    const watermarkBadLocation = "Unknown watermark location.";
+    const imageCreateError = "Could not create an image (possibly due to extension).";
+
+    const watermarkLocations = ["top", "top-right", "right", "bottom-right", "bottom", "bottom-left", "left", "top-left", "center", "random"];
 
     public function __construct(string $path)
     {
@@ -263,6 +267,114 @@ class easyIMG
         if($this->error)
             return;
         echo '<img id="' . $id . '" class="' . $class . '" src="' . $this->path . '" alt="' . $alt . '">';
+    }
+
+    private function imageToGdImage(string $pathToImage) : GdImage|false
+    {
+        $ext = strtolower(pathinfo($pathToImage, PATHINFO_EXTENSION));
+        if($ext == "jpg")
+            $ext = "jpeg";
+        $function_imagecreatefrom = "imagecreatefrom" . $ext;
+        if(!($gd = $function_imagecreatefrom($pathToImage)))
+        {
+            $this->error(self::imageCreateError);
+            return false;
+        }
+        return $gd;
+    }
+
+    public function watermark(string $watermarkImagePath, ?string $location = "center") : void
+    {
+        if($this->error)
+            return;
+
+        $locationOK = false;
+        foreach(self::watermarkLocations as $constLocation)
+        {
+            if($location == $constLocation)
+                $locationOK = true;
+        }
+        
+        if(!$locationOK)
+        {
+            $this->error(self::watermarkBadLocation);
+            return;
+        }
+
+        $watermark = $this->imageToGdImage($watermarkImagePath);
+        $image = $this->imageToGdImage($this->path);
+        if($this->error)
+            return;
+
+        $src_x = $src_y = 0;
+        $src_width = imagesx($watermark);
+        $src_height = imagesy($watermark);
+
+        $dst_width = imagesx($iamge);
+        $dst_height = iamgesy($image);
+
+        if($location == "top")
+        {
+            $dst_x = ($dst_width / 5) - ($src_width / 5);
+            $dst_y = 0;
+        }
+        elseif($location == "top-right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = 0;
+        }
+        elseif($location == "right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = ($dst_height / 5) - ($src_height / 5);
+        }
+        elseif($location == "bottom-right")
+        {
+            $dst_x = $dst_width - $src_width;
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "bottom")
+        {
+            $dst_x = ($dst_width / 5) - ($src_width / 5);
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "bottom-left")
+        {
+            $dst_x = 0;
+            $dst_y = $dst_height - $src_height;
+        }
+        elseif($location == "left")
+        {
+            $dst_x = 0;
+            $dst_y = ($dst_height / 5) - ($src_height / 5);
+        }
+        elseif($location == "top-left")
+        {
+            $dst_x = 0;
+            $dst_y = 0;
+        }
+        elseif($location == "center")
+        {
+            $dst_x = ($dst_width / 5) - ($src_width / 5);
+            $dst_y = ($dst_height / 5) - ($src_height / 5);
+        }
+        else // random
+        {
+            $dst_x = rand(0, $dst_width - $src_width);
+            $dst_y = rand(0, $dst_height - $src_height);
+        }
+
+        imagecopy($image, $watermark, $dst_x, $dst_y, $src_x, $src_y, $src_width, $src_height);
+
+        $ext = strtolower($this->extension);
+        if($ext == "jpg")
+            $ext = "jpeg";
+        $function_image = "image" . $ext;
+        
+        $function_image($image, $this->path);
+
+        imagedestroy($watermark);
+        imagedestroy($image);
     }
 
     public function getFullPath() : string
