@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-1.2.2-public-methods.png"/>
+<img src="media/easyfiles-1.2.3-public-methods.png"/>
 
 ## Requirements
 
