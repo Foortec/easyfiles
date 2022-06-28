@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-1.1.0-public-methods.png"/>
+<img src="media/easyfiles-1.2.2-public-methods.png"/>
 
 ## Requirements
 
@@ -424,6 +424,64 @@ public function easyIMG::getSize() : int
 <br/>**Return values**
 
 An **integer** size is returned (in bytes).
+
+<br/><br/>
+#### watermark()
+<br/>**Description**
+
+Adds watermark to the image.
+
+```php
+public easyIMG::watermark(
+  string $watermarkImagePath,
+  string $location = "center"
+)
+```
+<br/>**Parameters**
+
+*watermarkImagePath*<br/>
+A string containing path to the watermark image.<br/><br/>
+
+*location*<br/>
+A string with the watermerk's location. It is set to "center" by default.
+
+```php
+// allowed watermark locations
+const watermarkLocations = [
+  "top",
+  "top-right",
+  "right",
+  "bottom-right",
+  "bottom",
+  "bottom-left",
+  "left",
+  "top-left",
+  "center",
+  "random"
+];
+```
+
+<br/>**Examples**<br/><br/>
+Example #1: Adding watermark and displaying results (+ errors handling)<br/>
+<br/>
+
+```php
+<?php
+require "easyfiles.php";
+use foortec\easyfiles\easyIMG;
+
+$img = new easyimg("imgs/picture.jpg");
+
+echo $obj->error? $obj->errorMessage : "Ok.";
+echo "<br>";
+
+$img->watermark("imgs/stamp.png", "bottom-left");
+
+echo $obj->error? $obj->errorMessage : "Ok.";
+echo "<br>";
+
+$img->display();
+```
 
 <br/><br/>
 
