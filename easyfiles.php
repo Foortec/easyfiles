@@ -231,7 +231,7 @@ class easyIMG
     const notImage = "The file is not an image.";
     const noFile = "No such file, path invalid, or permission denied.";
     const watermarkBadLocation = "Unknown watermark location.";
-    const imageCreateError = "Could not create an image (possibly due to extension).";
+    const imageCreateError = "Could not create an image.";
 
     const watermarkLocations = ["top", "top-right", "right", "bottom-right", "bottom", "bottom-left", "left", "top-left", "center", "random"];
 
@@ -271,7 +271,12 @@ class easyIMG
 
     private function imageToGdImage(string $pathToImage) : GdImage|false
     {
-        $ext = strtolower(pathinfo($pathToImage, PATHINFO_EXTENSION));
+        if(!($mime = explode("/", mime_content_type($pathToImage))))
+        {
+            $this->error();
+            return false;
+        }
+        $ext = strtolower($mime[1]);
         if($ext == "jpg")
             $ext = "jpeg";
         $function_imagecreatefrom = "imagecreatefrom" . $ext;
@@ -367,7 +372,12 @@ class easyIMG
 
         imagecopy($image, $watermark, $dst_x, $dst_y, $src_x, $src_y, $src_width, $src_height);
 
-        $ext = strtolower($this->extension);
+        if(!($mime = explode("/", mime_content_type($this->path))))
+        {
+            $this->error();
+            return;
+        }
+        $ext = strtolower($mime[1]);
         if($ext == "jpg")
             $ext = "jpeg";
         $function_image = "image" . $ext;
