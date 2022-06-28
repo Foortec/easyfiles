@@ -343,7 +343,7 @@ class easyIMG
         return array($dst_x, $dst_y);
     }
 
-    public function watermark(string $watermarkImagePath, ?string $location = "center") : void
+    public function watermark(string $watermarkImagePath, string $location = "center") : void
     {
         if($this->error)
             return;
