@@ -119,16 +119,7 @@ class easyUpload
             return;
         }
 
-        $extensionOK = false;
-        for($i=0; $i<count($this->extensions); $i++)
-        {
-            if($this->extensions[$i]==$this->extension)
-            {
-                $extensionOK = true;
-                break;
-            }
-        }
-        if(!$extensionOK)
+        if(!in_array($this->extension, $this->extensions))
             $this->error(self::invalidExtMsg);
     }
 
