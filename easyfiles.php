@@ -42,10 +42,10 @@ class EasyUpload
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
-    const INVALID_EXT_MSG = "The file extension is not allowed.";
-    const TO_BIG_MSG = "The file is to big.";
-    const TO_SMALL_MSG = "The file is to small.";
-    const NOT_DIRECTORY = "The path does not lead to a directory.";
+    const INVALID_EXT_ERROR = "The file extension is not allowed.";
+    const TO_BIG_ERROR = "The file is to big.";
+    const TO_SMALL_ERROR = "The file is to small.";
+    const NOT_DIRECTORY_ERROR = "The path does not lead to a directory.";
     const FILE_TO_UPLOAD_ERROR = "Given file input name is incorrect.";
 
     const DEFAULT_EXTENSIONS = array("png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "wbmp", "xbm", "doc", "docx", "docm", "txt", "pdf", "htm", "html", "xml", "php", "ppt", "pptx", "json", "csv", "xls", "xlsx", "odt", "ods", "odp", "odg");
@@ -104,23 +104,23 @@ class EasyUpload
 
         if(!is_dir($this->savePath))
         {
-            $this->error(self::NOT_DIRECTORY);
+            $this->error(self::NOT_DIRECTORY_ERROR);
             return;
         }
         
         if($this->size < $this->minSize)
         {
-            $this->error(self::TO_SMALL_MSG);
+            $this->error(self::TO_SMALL_ERROR);
             return;
         }
         if($this->size > $this->maxSize)
         {
-            $this->error(self::TO_BIG_MSG);
+            $this->error(self::TO_BIG_ERROR);
             return;
         }
 
         if(!in_array($this->extension, $this->extensions))
-            $this->error(self::INVALID_EXT_MSG);
+            $this->error(self::INVALID_EXT_ERROR);
     }
 
     private function randomFilename(?string $prefix = "file", ?string $name = null) : string
@@ -219,9 +219,9 @@ class EasyIMG
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
-    const NOT_IMAGE = "The file is not an image.";
-    const NO_FILE = "No such file, path invalid, or permission denied.";
-    const WATERMARK_BAD_LOCATION = "Unknown watermark location.";
+    const NOT_IMAGE_ERROR = "The file is not an image.";
+    const NO_FILE_ERROR = "No such file, path invalid, or permission denied.";
+    const WATERMARK_BAD_LOCATION_ERROR = "Unknown watermark location.";
     const IMAGE_CREATE_ERROR = "Could not create an image.";
 
     const WATERMARK_LOCATIONS = ["top", "top-right", "right", "bottom-right", "bottom", "bottom-left", "left", "top-left", "center", "random"];
@@ -232,13 +232,13 @@ class EasyIMG
         
         if(!file_exists($this->path))
         {
-            $this->error(self::NO_FILE);
+            $this->error(self::NO_FILE_ERROR);
             return;
         }
 
         if(!$this->fileIsImage($this->path))
         {
-            $this->error(self::NOT_IMAGE);
+            $this->error(self::NOT_IMAGE_ERROR);
             return;
         }
 
@@ -343,7 +343,7 @@ class EasyIMG
 
         if(!in_array($location, self::WATERMARK_LOCATIONS))
         {
-            $this->error(self::WATERMARK_BAD_LOCATION);
+            $this->error(self::WATERMARK_BAD_LOCATION_ERROR);
             return;
         }
 
@@ -384,7 +384,7 @@ class EasyIMG
         return $this->path;
     }
 
-    public function getThumb(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null) : easyThumb
+    public function getThumb(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, ?int $maxDimension = 100, ?int $width = null, ?int $height = null) : easyThumb
     {
         return new easyThumb($prefix, $filename, $pathThumb, $this->path, $maxDimension, $width, $height);
     }
@@ -434,11 +434,11 @@ class EasyThumb
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
-    const NOT_IMAGE = "The file is not an image.";
-    const NO_FILE = "No such file, path invalid, or permission denied.";
-    const NO_DIMENSIONS = "Unspecified dimensions.";
-    const DIMENSIONS_CONFLICT = "Given to many dimensions. Conflict.";
-    const NOT_DIRECTORY = "The path does not lead to a directory.";
+    const NOT_IMAGE_ERROR = "The file is not an image.";
+    const NO_FILE_ERROR = "No such file, path invalid, or permission denied.";
+    const NO_DIMENSIONS_ERROR = "Unspecified dimensions.";
+    const DIMENSIONS_CONFLICT_ERROR = "Given to many dimensions. Conflict.";
+    const NOT_DIRECTORY_ERROR = "The path does not lead to a directory.";
 
     public function __construct(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null)
     {
@@ -447,7 +447,7 @@ class EasyThumb
 
         if(!is_dir($this->pathThumb))
         {
-            $this->error(self::NOT_DIRECTORY);
+            $this->error(self::NOT_DIRECTORY_ERROR);
             return;
         }
 
@@ -480,24 +480,24 @@ class EasyThumb
     {
         if(!file_exists($this->pathIMG))
         {
-            $this->error(self::NO_FILE);
+            $this->error(self::NO_FILE_ERROR);
             return;
         }
 
         if(!$this->fileIsImage($this->pathIMG))
         {
-            $this->error(self::NOT_IMAGE);
+            $this->error(self::NOT_IMAGE_ERROR);
             return;
         }
 
         if(is_null($this->maxDimension) && is_null($this->width) && is_null($this->height))
         {
-            $this->error(self::NO_DIMENSIONS);
+            $this->error(self::NO_DIMENSIONS_ERROR);
             return;
         }
 
         if(!is_null($this->maxDimension) && (!is_null($this->width) || !is_null($this->height)))
-            $this->error(self::DIMENSIONS_CONFLICT);
+            $this->error(self::DIMENSIONS_CONFLICT_ERROR);
     }
 
     private function calcDimensions(int $widthIMG, int $heightIMG) : void
@@ -579,10 +579,8 @@ class EasyThumb
             return false;
         
         if(!is_null($extension))
-        {
             $this->extension = $extension;
-            $this->pathThumb = $this->pathThumb . "/" . $this->filename . "." . $this->extension;
-        }
+        $this->pathThumb = $this->pathThumb . "/" . $this->getBasename();
 
         if($this->extension == "jpg")
             $ext = "jpeg";
@@ -635,9 +633,9 @@ class EasyDoc
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
-    const NO_FILE = "No such file.";
-    const FILE_IS_IMAGE = "The file is an image.";
-    const IS_DIRECTORY = "The file is a directory.";
+    const NO_FILE_ERROR = "No such file.";
+    const FILE_IS_IMAGE_ERROR = "The file is an image.";
+    const IS_DIRECTORY_ERROR = "The file is a directory.";
     const FILE_READ_ERROR = "The file is missing or permission denied.";
 
     public function __construct(string $path)
@@ -649,19 +647,19 @@ class EasyDoc
 
         if(!file_exists($this->path))
         {
-            $this->error(self::NO_FILE);
+            $this->error(self::NO_FILE_ERROR);
             return;
         }
 
         if(is_dir($this->path))
         {
-            $this->error(self::IS_DIRECTORY);
+            $this->error(self::IS_DIRECTORY_ERROR);
             return;
         }
 
         if($this->fileIsImage($this->path))
         {
-            $this->error(self::FILE_IS_IMAGE);
+            $this->error(self::FILE_IS_IMAGE_ERROR);
             return;
         }
     }
@@ -831,14 +829,14 @@ class easyMigrate
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
-    const FILE_EXISTS = "The file already exists.";
-    const WRONG_PATH = "The file does not exist.";
+    const FILE_EXISTS_ERROR = "The file already exists.";
+    const WRONG_PATH_ERROR = "The file does not exist.";
     const FILE_READ_ERROR = "The file is missing or permission denied.";
     const FILE_CREATE_ERROR = "The file can not be created.";
-    const NO_FILE_AND_NO_TABLE = "There is no file and no database table.";
-    const EVERYTHING_EXISTS = "Both database table and file exist. Conflict.";
-    const IMPORT_IMPOSSIBLE = "Import operation is impossible with this set of input data.";
-    const EXPORT_IMPOSSIBLE = "Export operation is impossible with this set of input data.";
+    const NO_FILE_AND_NO_TABLE_ERROR = "There is no file and no database table.";
+    const EVERYTHING_EXISTS_ERROR = "Both database table and file exist. Conflict.";
+    const IMPORT_IMPOSSIBLE_ERROR = "Import operation is impossible with this set of input data.";
+    const EXPORT_IMPOSSIBLE_ERROR = "Export operation is impossible with this set of input data.";
     const MYSQLI_CONNECTION_ERROR = "Database connection failure.";
 
     public function __construct(string $path, string $tableName, string $hostname = MYSQLI_HOSTNAME, string $username = MYSQLI_USERNAME, string $password = MYSQLI_PASSWORD, string $database = MYSQLI_DATABASE, string $port = MYSQLI_PORT, string $socket = MYSQLI_SOCKET)
@@ -855,7 +853,7 @@ class easyMigrate
 
         if(!file_exists($this->path))
         {
-            $this->error(self::WRONG_PATH);
+            $this->error(self::WRONG_PATH_ERROR);
             return;
         }
 
@@ -869,13 +867,13 @@ class easyMigrate
                 return;
             }
 
-            $this->error(self::NO_FILE_AND_NO_TABLE);
+            $this->error(self::NO_FILE_AND_NO_TABLE_ERROR);
             return;
         }
 
         if($this->tableExists)
         {
-            $this->error(self::EVERYTHING_EXISTS);
+            $this->error(self::EVERYTHING_EXISTS_ERROR);
             return;
         }
 
@@ -909,7 +907,7 @@ class easyMigrate
 
         if($this->operation != "import")
         {
-            $this->error(self::IMPORT_IMPOSSIBLE);
+            $this->error(self::IMPORT_IMPOSSIBLE_ERROR);
             return;
         }
 
@@ -1120,7 +1118,7 @@ class easyMigrate
 
         if($this->operation != "export")
         {
-            $this->error(self::EXPORT_IMPOSSIBLE);
+            $this->error(self::EXPORT_IMPOSSIBLE_ERROR);
             return false;
         }
 
@@ -1131,7 +1129,7 @@ class easyMigrate
         
         if(file_exists($path))
         {
-            $this->error(self::FILE_EXISTS);
+            $this->error(self::FILE_EXISTS_ERROR);
             return false;
         }
 
