@@ -1,8 +1,8 @@
-# easyFiles
+# EasyFiles
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-1.2.3-public-methods.png"/>
+<img src="media/easyfiles-3.0.0-public-methods.png"/>
 
 ## Requirements
 
@@ -12,21 +12,21 @@ A set of classes designed to help you upload images and documents, display them,
 
 ## Classes and their public methods
 
-### easyUpload
+### EasyUpload
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of the **easyUpload** class.
+Creates a new instance of the **EasyUpload** class.
 
 ```php
-public easyUpload::__construct(
+public EasyUpload::__construct(
   string $fileToUpload,
   string $savePath,
   ?string $save_as = NULL,
   int $minSize = 0,
   int $maxSize = 100000000,
-  array $allowedExtensions = self::default_extensions
+  array $allowedExtensions = self::DEFAULT_EXTENSIONS
 )
 ```
 <br/>**Parameters**
@@ -47,11 +47,11 @@ The minimum size of the file (in bytes).<br/><br/>
 The maximum size of the file (in bytes).<br/><br/>
 
 *allowedExtensions*<br/>
-An array of the allowed extension. By default it contains constant default_extensions array.
+An array of the allowed extension. By default it contains constant DEFAULT_EXTENSIONS array.
 
 ```php
 // default allowed extensions
-const default_extensions = array(
+const DEFAULT_EXTENSIONS = array(
   "png",
   "jpg",
   "jpeg",
@@ -116,7 +116,7 @@ use foortec\easyFiles\easyUpload, Throwable;
 
 try
 {
-  $upload = new easyUpload("upload", "uploaded");
+  $upload = new EasyUpload("upload", "uploaded");
   
   echo $upload->error? $upload->errorMessage : "An instance of the object created successfully.";
 }
@@ -132,7 +132,7 @@ catch(Throwable $t)
 Saves the file in the desired directory.
 
 ```php
-public function easyUpload::save() : bool
+public function EasyUpload::save() : bool
 ```
 <br/>**Return values**
 
@@ -171,7 +171,7 @@ use foortec\easyFiles\easyUpload, Throwable;
 
 try
 {
-  $upload = new easyUpload("upload", "uploaded");
+  $upload = new EasyUpload("upload", "uploaded");
   
   echo $upload->error? $upload->errorMessage : "An instance of the object created successfully.";
   echo '<br/>';
@@ -190,7 +190,7 @@ catch(Throwable $t)
 Returns path to the saved file.
 
 ```php
-public function easyUpload::getFullPath() : string|bool
+public function EasyUpload::getFullPath() : string|bool
 ```
 <br/>**Return values**
 
@@ -200,27 +200,27 @@ If the file is already saved (*save()* method was successfully used), a **string
 #### getIMG()
 <br/>**Description**
 
-Returns an instance of *easyIMG* class.
+Returns an instance of **EasyIMG** class.
 
 ```php
-public function easyUpload::getIMG() : easyIMG|bool
+public function EasyUpload::getIMG() : EasyIMG|bool
 ```
 <br/>**Return values**
 
-If the file is already saved (*save()* method was successfully used), an *easyIMG* **object** is returned. Otherwise a **false** is returned.
+If the file is already saved (*save()* method was successfully used), an *EasyIMG* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getDoc()
 <br/>**Description**
 
-Returns an instance of *easyDoc* class.
+Returns an instance of **EasyDoc** class.
 
 ```php
-public function easyUpload::getDoc() : easyDoc|bool
+public function EasyUpload::getDoc() : EasyDoc|bool
 ```
 <br/>**Return values**
 
-If the file is already saved (*save()* method was successfully used), an *easyDoc* **object** is returned. Otherwise a **false** is returned.
+If the file is already saved (*save()* method was successfully used), an *EasyDoc* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getType()
@@ -229,7 +229,7 @@ If the file is already saved (*save()* method was successfully used), an *easyDo
 Get type of the file.
 
 ```php
-public function easyUpload::getType() : string
+public function EasyUpload::getType() : string
 ```
 <br/>**Return values**
 
@@ -242,7 +242,7 @@ A "img" or "doc" **string**. Based on file's MIME type. So even if the image has
 Returns basename (filename with extension) of the file.
 
 ```php
-public function easyUpload::getBasename() : string
+public function EasyUpload::getBasename() : string
 ```
 <br/>**Return values**
 
@@ -255,7 +255,7 @@ A **string** containing the basename is returned. If the basename have not been 
 Returns filename.
 
 ```php
-public function easyUpload::getFilename() : string
+public function EasyUpload::getFilename() : string
 ```
 <br/>**Return values**
 
@@ -268,7 +268,7 @@ A **string** containing the filename is returned. If the filename have not been 
 Returns extension of the file.
 
 ```php
-public function easyUpload::getExtension() : string
+public function EasyUpload::getExtension() : string
 ```
 <br/>**Return values**
 
@@ -281,7 +281,7 @@ A **string** containing the extension is returned. If the extension have not bee
 Returns size of the file in bytes.
 
 ```php
-public function easyUpload::getSize() : int
+public function EasyUpload::getSize() : int
 ```
 <br/>**Return values**
 
@@ -289,15 +289,15 @@ An **integer** size is returned (in bytes). The file does not need to be saved (
 
 <br/><br/>
 
-### easyIMG
+### EasyIMG
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of the **easyIMG** class.
+Creates a new instance of the **EasyIMG** class.
 
 ```php
-public function easyIMG::__construct(string $path)
+public function EasyIMG::__construct(string $path)
 ```
 <br/>**Parameters**
 
@@ -311,7 +311,7 @@ A string containing path to the image.
 Displays image using HTML <img> tag.
 
 ```php
-public function easyIMG::display(
+public function EasyIMG::display(
   ?string $id = NULL, 
   ?string $class = NULL,
   ?string $alt = NULL
@@ -335,7 +335,7 @@ An alt text of the displayed image tag.
 Returns image path.
 
 ```php
-public function easyIMG::getFullPath() : string
+public function EasyIMG::getFullPath() : string
 ```
 <br/>**Return values**
 
@@ -348,16 +348,28 @@ A **string** containing the path to the file is returned.
 Returns an instance of *easyDoc* class.
 
 ```php
-public function easyIMG::getThumb(
-  string $thumbnailsFolder,
-  ?int $width = 100,
-  ?int $height = NULL
-) : easyThumb
+public function EasyIMG::getThumb(
+  string $prefix = "thumb-",
+  ?string $filename = null,
+  string $pathThumb,
+  ?int $maxDimension = 100,
+  ?int $width = null,
+  ?int $height = null
+) : EasyThumb
 ```
 <br/>**Parameters**
 
-*thumbnailsFolder*<br/>
+*prefix*<br/>
+Prefix to the thumbnail's filename.<br/><br/>
+
+*filename*<br/>
+Thumbnail's filename. If NULL, will be the same as source image's filename.<br/><br/>
+
+*pathThumb*<br/>
 Path, where the thumbnail will be saved.<br/><br/>
+
+*maxDimension*<br/>
+Measurement of the longest dimension of an image (in pixels). The second dimension will be calculated according to aspect ratio.<br/><br/>
 
 *width*<br/>
 Thumbnail's with in pixels. It will be calculated according to aspect ratio if set to NULL (while *height* is not NULL).<br/><br/>
@@ -367,11 +379,11 @@ Thumbnail's height in pixels. It will be calculated according to aspect ratio if
 
 <br/>**Return values**
 
-An *easyThumb* **object** is returned.
+An *EasyThumb* **object** is returned.
 
 <br/>**Notes**
 
-Only one of the dimensions (*width* and *height*) can be set to NULL at the same time.
+If *maxDimension* is not NULL, *width* and *height* must be set to NULL. If *maxDimension* is NULL, maximally one of the *width* and *height* can be NULL. Otherwise there will be a conflict, the constructor will not know which dimensions to use.
 
 <br/><br/>
 #### getBasename()
@@ -380,7 +392,7 @@ Only one of the dimensions (*width* and *height*) can be set to NULL at the same
 Returns basename (filename with extension) of the image.
 
 ```php
-public function easyIMG::getBasename() : string
+public function EasyIMG::getBasename() : string
 ```
 <br/>**Return values**
 
@@ -393,7 +405,7 @@ A **string** containing the basename is returned. If the basename have not been 
 Returns filename.
 
 ```php
-public function easyIMG::getFilename() : string
+public function EasyIMG::getFilename() : string
 ```
 <br/>**Return values**
 
@@ -406,7 +418,7 @@ A **string** containing the filename is returned. If the filename have not been 
 Returns extension of the image.
 
 ```php
-public function easyIMG::getExtension() : string
+public function EasyIMG::getExtension() : string
 ```
 <br/>**Return values**
 
@@ -419,7 +431,7 @@ A **string** containing the extension is returned. If the extension have not bee
 Returns size of the image in bytes.
 
 ```php
-public function easyIMG::getSize() : int
+public function EasyIMG::getSize() : int
 ```
 <br/>**Return values**
 
@@ -432,10 +444,10 @@ An **integer** size is returned (in bytes).
 Adds watermark to the image.
 
 ```php
-public easyIMG::watermark(
+public EasyIMG::watermark(
   string $watermarkImagePath,
   string $location = "center"
-)
+) : void
 ```
 <br/>**Parameters**
 
@@ -447,7 +459,7 @@ A string with the watermerk's location. It is set to "center" by default.
 
 ```php
 // allowed watermark locations
-const watermarkLocations = [
+const WATERMARK_LOCATIONS = [
   "top",
   "top-right",
   "right",
@@ -468,9 +480,9 @@ Example #1: Adding watermark and displaying results (+ errors handling)<br/>
 ```php
 <?php
 require "easyfiles.php";
-use foortec\easyfiles\easyIMG;
+use foortec\easyfiles\EasyIMG;
 
-$img = new easyimg("imgs/picture.jpg");
+$img = new Easyimg("imgs/picture.jpg");
 
 echo $obj->error? $obj->errorMessage : "Ok.";
 echo "<br>";
@@ -485,15 +497,15 @@ $img->display();
 
 <br/><br/>
 
-### easyThumb
+### EasyThumb
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of the **easyThumb** class.
+Creates a new instance of the **EasyThumb** class.
 
 ```php
-public function easyThumb::__construct(
+public function EasyThumb::__construct(
   string $prefix = "thumb-",
   ?string $filename = null,
   string $pathThumb,
@@ -537,7 +549,7 @@ If *maxDimension* is not NULL, *width* and *height* must be set to NULL. If *max
 Returns thumbnail path.
 
 ```php
-public function easyThumb::getFullPath() : string
+public function EasyThumb::getFullPath() : string
 ```
 <br/>**Return values**
 
@@ -550,7 +562,7 @@ A **string** containing the path to the thumbnail is returned.
 Displays thumbnail using HTML <img> tag.
 
 ```php
-public function easyThumb::display(
+public function EasyThumb::display(
   ?string $id=NULL,
   ?string $class=NULL,
   ?string $alt=NULL
@@ -569,7 +581,7 @@ An alt text of the displayed image tag.
 
 <br/>**Notes**
 
-The thumbnail does not need to be saved to display it.
+The thumbnail does not need to be saved to be displayed.
 
 <br/><br/>
 #### save()
@@ -578,7 +590,7 @@ The thumbnail does not need to be saved to display it.
 Saves thumbnail.
 
 ```php
-public function easyThumb::save(?string $extension = null) : bool
+public function EasyThumb::save(?string $extension = null) : bool
 ```
 <br/>**Parameters**
 
@@ -596,7 +608,7 @@ Returns **true** on success and **false** on failure. **False** can also mean th
 Returns basename (filename with extension) of the thumbnail.
 
 ```php
-public function easyThumb::getBasename() : string
+public function EasyThumb::getBasename() : string
 ```
 <br/>**Return values**
 
@@ -609,7 +621,7 @@ A **string** containing the basename is returned.
 Returns filename.
 
 ```php
-public function easyThumb::getFilename() : string
+public function EasyThumb::getFilename() : string
 ```
 <br/>**Return values**
 
@@ -622,7 +634,7 @@ A **string** containing the filename is returned.
 Returns extension of the thumbnail.
 
 ```php
-public function easyThumb::getExtension() : string
+public function EasyThumb::getExtension() : string
 ```
 <br/>**Return values**
 
@@ -635,7 +647,7 @@ A **string** containing the extension is returned.
 Returns size of the saved thumbnail in bytes.
 
 ```php
-public function easyThumb::getSize() : int|bool
+public function EasyThumb::getSize() : int|bool
 ```
 <br/>**Return values**
 
@@ -645,23 +657,23 @@ An **integer** size is returned (in bytes). Returns **false** if the thumbnail h
 #### __destruct()
 <br/>**Description**
 
-Destructs a **easyThumb** class object.
+Destructs a **EasyThumb** class object.
 
 ```php
-public function easyThumb::__destruct()
+public function EasyThumb::__destruct()
 ```
 
 <br/><br/>
 
-### easyDoc
+### EasyDoc
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of the **easyDoc** class.
+Creates a new instance of the **EasyDoc** class.
 
 ```php
-public function easyDoc::__construct(string $path)
+public function EasyDoc::__construct(string $path)
 ```
 <br/>**Parameters**
 
@@ -676,17 +688,17 @@ Displays unformatted content of the file.<br/>
 If nothing is display, it is propably because of an error or the file is empty.
 
 ```php
-public function easyDoc::displayRaw() : void
+public function EasyDoc::displayRaw() : void
 ```
 
 <br/><br/>
 #### getMigrate()
 <br/>**Description**
 
-Returns an instance of **easyMigrate** class.
+Returns an instance of **EasyMigrate** class.
 
 ```php
-public function easyDoc::getMigrate(
+public function EasyDoc::getMigrate(
   string $tableName,
   string $hostname = MYSQLI_HOSTNAME,
   string $username = MYSQLI_USERNAME,
@@ -694,7 +706,7 @@ public function easyDoc::getMigrate(
   string $database = MYSQLI_DATABASE,
   string $port = MYSQLI_PORT,
   string $socket = MYSQLI_SOCKET
-) : easyMigrate
+) : EasyMigrate
 ```
 <br/>**Parameters**
 
@@ -744,7 +756,7 @@ The object created via *getMigrate()* method can only be used to import the file
 Returns document path.
 
 ```php
-public function easyDoc::getFullPath() : string
+public function EasyDoc::getFullPath() : string
 ```
 <br/>**Return values**
 
@@ -757,7 +769,7 @@ A **string** containing the path to the document is returned.
 Returns basename (filename with extension) of the file.
 
 ```php
-public function easyDoc::getBasename() : string
+public function EasyDoc::getBasename() : string
 ```
 <br/>**Return values**
 
@@ -770,7 +782,7 @@ A **string** containing the basename is returned.
 Returns filename.
 
 ```php
-public function easyDoc::getFilename() : string
+public function EasyDoc::getFilename() : string
 ```
 <br/>**Return values**
 
@@ -783,7 +795,7 @@ A **string** containing the filename is returned.
 Returns extension of the file.
 
 ```php
-public function easyDoc::getExtension() : string
+public function EasyDoc::getExtension() : string
 ```
 <br/>**Return values**
 
@@ -796,7 +808,7 @@ A **string** containing the extension is returned.
 Returns size of the file in bytes.
 
 ```php
-public function easyDoc::getSize() : int
+public function EasyDoc::getSize() : int
 ```
 <br/>**Return values**
 
@@ -804,15 +816,15 @@ An **integer** size is returned (in bytes).
 
 <br/><br/>
 
-### easyMigrate
+### EasyMigrate
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of **easyMigrate** class.
+Creates a new instance of **EasyMigrate** class.
 
 ```php
-public function easyMigrate::__construct(
+public function EasyMigrate::__construct(
   string $path,
   string $tableName,
   string $hostname = MYSQLI_HOSTNAME,
@@ -870,7 +882,7 @@ The *path* and the *tableName* arguments define what is possible to do: import o
 Imports the document to the database.
 
 ```php
-public function easyMigrate::import(string $delimiter = ",") : void
+public function EasyMigrate::import(string $delimiter = ",") : void
 ```
 <br/>**Parameters**
 
@@ -879,7 +891,7 @@ A sign separating bits of data in the file. The *import()* method may use it or 
 
 <br/>**Notes**
 
-If import is not possible (see **Notes** for *easyMigrate::__construct()*) an error will occur.
+If import is not possible (see **Notes** for *EasyMigrate::__construct()*) an error will occur.
 
 <br/><br/>
 #### export()
@@ -888,11 +900,11 @@ If import is not possible (see **Notes** for *easyMigrate::__construct()*) an er
 Exports the document from the database.
 
 ```php
-public function easyMigrate::export(
+public function EasyMigrate::export(
   ?string $filename = null,
   string $extension = "txt",
   string $delimiter = ","
-) : easyDoc|bool
+) : EasyDoc|bool
 ```
 <br/>**Parameters**
 
@@ -911,7 +923,7 @@ An *easyDoc* **object** is returned on success, **false** on failure or if an er
 
 <br/>**Notes**
 
-If export is not possible (see **Notes** for *easyMigrate::__construct()*) an error will occur.<br/><br/>
+If export is not possible (see **Notes** for *EasyMigrate::__construct()*) an error will occur.<br/><br/>
 A name of the exported file will be the same as table name.
 
 <br/><br/>
