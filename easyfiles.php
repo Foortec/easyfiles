@@ -49,11 +49,11 @@ class EasyUpload
     const FILE_TO_UPLOAD_ERROR = "Given file input name is incorrect.";
 
     const DEFAULT_EXTENSIONS = array("png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "wbmp", "xbm", "doc", "docx", "docm", "txt", "pdf", "htm", "html", "xml", "php", "ppt", "pptx", "json", "csv", "xls", "xlsx", "odt", "ods", "odp", "odg");
-    private array $extensions;
+    private array|bool $extensions;
     private int $minSize;
     private int $maxSize;
 
-    public function __construct(string $fileToUpload, string $savePath, ?string $save_as = NULL, int $minSize = 0, int $maxSize = 100000000, array $allowedExtensions = self::DEFAULT_EXTENSIONS)
+    public function __construct(string $fileToUpload, string $savePath, ?string $save_as = NULL, int $minSize = 0, int $maxSize = 100000000, array|bool $allowedExtensions = self::DEFAULT_EXTENSIONS)
     {
         $save_as = preg_replace(";^\.;", "", htmlentities($save_as));
         $this->savePath = preg_replace(";\/$;", "", htmlentities($savePath));
@@ -118,6 +118,9 @@ class EasyUpload
             $this->error(self::TO_BIG_ERROR);
             return;
         }
+
+        if(is_bool($this->extensions))
+            return;
 
         if(!in_array($this->extension, $this->extensions))
             $this->error(self::INVALID_EXT_ERROR);
