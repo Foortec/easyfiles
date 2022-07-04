@@ -47,6 +47,7 @@ class EasyUpload
     const TO_SMALL_ERROR = "The file is to small.";
     const NOT_DIRECTORY_ERROR = "The path does not lead to a directory.";
     const FILE_TO_UPLOAD_ERROR = "Given file input name is incorrect.";
+    const SAVE_ERROR = "Could not save.";
 
     const DEFAULT_EXTENSIONS = array("png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "wbmp", "xbm", "doc", "docx", "docm", "txt", "pdf", "htm", "html", "xml", "php", "ppt", "pptx", "json", "csv", "xls", "xlsx", "odt", "ods", "odp", "odg");
     private array|bool $extensions;
@@ -88,6 +89,8 @@ class EasyUpload
         if($this->saved || $this->error)
             return false;
         $this->saved = move_uploaded_file($this->tmp, $this->savePath . "/" . $this->basename);
+        if($this->saved == false)
+            $this->error(self::SAVE_ERROR);
         return $this->saved;
     }
 
@@ -442,6 +445,7 @@ class EasyThumb
     const NO_DIMENSIONS_ERROR = "Unspecified dimensions.";
     const DIMENSIONS_CONFLICT_ERROR = "Given to many dimensions. Conflict.";
     const NOT_DIRECTORY_ERROR = "The path does not lead to a directory.";
+    const SAVE_ERROR = "Could not save.";
 
     public function __construct(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null)
     {
@@ -592,6 +596,10 @@ class EasyThumb
         
         $imageExt = "image" . $ext;
         $this->saved = $imageExt($this->handle, $this->pathThumb);
+
+        if($this->saved == false)
+            $this->error(self::SAVE_ERROR);
+
         imagedestroy($this->handle);
         return $this->saved;
     }
