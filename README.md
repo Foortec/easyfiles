@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-3.0.0-public-methods.png"/>
+<img src="media/easyfiles-3.1.1-public-methods.png"/>
 
 ## Requirements
 
@@ -26,7 +26,7 @@ public EasyUpload::__construct(
   ?string $save_as = NULL,
   int $minSize = 0,
   int $maxSize = 100000000,
-  array $allowedExtensions = self::DEFAULT_EXTENSIONS
+  array|bool $allowedExtensions = self::DEFAULT_EXTENSIONS
 )
 ```
 <br/>**Parameters**
@@ -47,7 +47,7 @@ The minimum size of the file (in bytes).<br/><br/>
 The maximum size of the file (in bytes).<br/><br/>
 
 *allowedExtensions*<br/>
-An array of the allowed extension. By default it contains constant DEFAULT_EXTENSIONS array.
+An array of the allowed extension. By default it contains constant DEFAULT_EXTENSIONS array. If bool (*true* or *false*), extension will be ignored (all extensions allowed).
 
 ```php
 // default allowed extensions
