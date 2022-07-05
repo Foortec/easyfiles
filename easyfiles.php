@@ -212,6 +212,16 @@ class EasyUpload
             return filesize($this->getFullPath());
         return filesize($this->tmp);
     }
+
+    public static function getForm(string $action, string $fileInputName = "fileToUpload", string $submitInputName = "submit", string $submitInputValue = "Upload") : void
+    {
+        echo '
+        <form method="post" action="' . $action . '" enctype="multipart/form-data">
+            <input type="file" name="' . $fileInputName . '">
+            <input type="submit" name="' . $submitInputName . '" value="' . $submitInputValue . '">
+        </form>
+        ';
+    }
 }
 
 class EasyIMG
