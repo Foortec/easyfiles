@@ -215,8 +215,10 @@ class EasyUpload
         return filesize($this->tmp);
     }
 
-    public static function getForm(string $action, string $fileInputName = "fileToUpload", string $submitInputName = "submit", string $submitInputValue = "Upload") : void
+    public static function getForm(?string $action = NULL, string $fileInputName = "fileToUpload", string $submitInputName = "submit", string $submitInputValue = "Upload") : void
     {
+        if($action == "")
+            $action = htmlentities($_SERVER["PHP_SELF"]);
         echo '
         <form method="post" action="' . $action . '" enctype="multipart/form-data">
             <input type="file" name="' . $fileInputName . '">
