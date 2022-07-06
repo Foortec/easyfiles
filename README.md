@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-3.1.1-public-methods.png"/>
+<img src="media/easyfiles-3.3.2-public-methods.png"/>
 
 ## Requirements
 
@@ -286,6 +286,34 @@ public function EasyUpload::getSize() : int
 <br/>**Return values**
 
 An **integer** size is returned (in bytes). The file does not need to be saved (with *save()* method) to get its size.
+
+<br/><br/>
+#### getForm()
+<br/>**Description**
+
+Static method displaying basic HTML form which contains two inputs: file and submit.
+
+```php
+public static function getForm(
+  ?string $action = NULL,
+  string $fileInputName = "fileToUpload",
+  string $submitInputName = "submit",
+  string $submitInputValue = "Upload"
+) : void
+```
+<br/>**Parameters**
+
+*action*<br/>
+The form's action property; is nullable, and if so, the form's action property will be set to the same file it is in.<br/><br/>
+
+*fileInputName*<br/>
+The file input's name.<br/><br/>
+
+*submitInputName*<br/>
+The submit input's name.<br/><br/>
+
+*submitInputValue*<br/>
+The submit input's value.
 
 <br/><br/>
 
@@ -938,6 +966,7 @@ Every class has it's own public properties used to errors handling.
 ```php
 public bool $error = false;
 public ?string $errorMessage = NULL;
+public ?int $errorCode = NULL;
 ```
 
 The data is always validated when creating an instance of the class. If something is not correct, the value of the *error* property is changed to **true** and the error message is inserted into the *errorMessage* property.<br/>
@@ -951,7 +980,7 @@ use foortec\easyFiles\easyUpload;
 
 $object = new easyUpload(/* args */);
 
-echo $object->error? $object->errorMessage : "Everything's fine!";
+echo $object->error? $object->errorCode . ": " . $object->errorMessage : "Everything's fine!";
 ```
 
 <br/><br/>
