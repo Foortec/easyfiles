@@ -131,7 +131,7 @@ class EasyUpload
             $this->error(self::INVALID_EXT_ERROR, 10);
     }
 
-    private function randomFilename(?string $prefix = "file", ?string $name = null) : string
+    private function randomFilename(?string $prefix = "file", ?string $name = NULL) : string
     {
         if($prefix != null || $name == null)
             $filename = $prefix . time();
@@ -275,7 +275,7 @@ class EasyIMG
         $this->errorCode = $code;
     }
 
-    public function display(?string $id=NULL, ?string $class=NULL, ?string $alt=NULL) : void
+    public function display(?string $id = NULL, ?string $class = NULL, ?string $alt = NULL) : void
     {
         if($this->error)
             return;
@@ -284,14 +284,7 @@ class EasyIMG
 
     private function imageToGdImage(string $pathToImage) : GdImage|false
     {
-        if(!($mime = explode("/", mime_content_type($pathToImage))))
-        {
-            $this->error();
-            return false;
-        }
-        $ext = strtolower($mime[1]);
-        if($ext == "jpg")
-            $ext = "jpeg";
+        $ext = preg_replace(";.*\/;", "", mime_content_type($pathToImage));
         $function_imagecreatefrom = "imagecreatefrom" . $ext;
         if(!function_exists($function_imagecreatefrom))
         {
@@ -406,7 +399,7 @@ class EasyIMG
         return $this->path;
     }
 
-    public function getThumb(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, ?int $maxDimension = 100, ?int $width = null, ?int $height = null) : easyThumb
+    public function getThumb(string $prefix = "thumb-", ?string $filename = NULL, string $pathThumb, ?int $maxDimension = 100, ?int $width = NULL, ?int $height = NULL) : easyThumb
     {
         return new easyThumb($prefix, $filename, $pathThumb, $this->path, $maxDimension, $width, $height);
     }
@@ -464,7 +457,7 @@ class EasyThumb
     const NOT_DIRECTORY_ERROR = "The path does not lead to a directory."; // 34
     const SAVE_ERROR = "Could not save."; // 35
 
-    public function __construct(string $prefix = "thumb-", ?string $filename = null, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = null, ?int $height = null)
+    public function __construct(string $prefix = "thumb-", ?string $filename = NULL, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = NULL, ?int $height = NULL)
     {
         $this->pathIMG = htmlentities($pathIMG);
         $this->pathThumb = preg_replace(";\/$;", "", htmlentities($pathThumb));
@@ -581,7 +574,7 @@ class EasyThumb
         return $this->pathThumb;
     }
 
-    public function display(?string $id=NULL, ?string $class=NULL, ?string $alt=NULL) : void
+    public function display(?string $id = NULL, ?string $class = NULL, ?string $alt = NULL) : void
     {
         if(!$this->thumbMade)
             return;
@@ -598,7 +591,7 @@ class EasyThumb
 		echo '<img id="' . $id . '" class="' . $class . '" src="data:image/png;base64,' . base64_encode($rawImageStream) . '" alt="' . $alt . '">';
     }
 
-    public function save(?string $extension = null) : bool
+    public function save(?string $extension = NULL) : bool
     {
         if(!$this->thumbMade)
             return false;
@@ -1144,7 +1137,7 @@ class EasyMigrate
         $mysqli->close();
     }
 
-    public function export(?string $filename = null, string $extension = "txt", string $delimiter = ",") : easyDoc|bool
+    public function export(?string $filename = NULL, string $extension = "txt", string $delimiter = ",") : easyDoc|bool
     {
         if($this->error && $this->errorCode != 56)
             return false;
@@ -1178,7 +1171,7 @@ class EasyMigrate
         return $this->exportTXT($filename, $delimiter);
     }
 
-    private function exportXML(?string $filename = null) : easyDoc|bool
+    private function exportXML(?string $filename = NULL) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
@@ -1218,7 +1211,7 @@ class EasyMigrate
         return new easyDoc($this->path);
     }
 
-    private function exportJSON(?string $filename = null) : easyDoc|bool
+    private function exportJSON(?string $filename = NULL) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
@@ -1241,7 +1234,7 @@ class EasyMigrate
         return new easyDoc($this->path);
     }
 
-    private function exportCSV(?string $filename = null, string $delimiter) : easyDoc|bool
+    private function exportCSV(?string $filename = NULL, string $delimiter) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
@@ -1261,7 +1254,7 @@ class EasyMigrate
         return new easyDoc($this->path);
     }
 
-    private function exportTXT(?string $filename = null, string $delimiter) : easyDoc|bool
+    private function exportTXT(?string $filename = NULL, string $delimiter) : easyDoc|bool
     {
         $tableColumns = $this->getTableColumns();
         $tableRows = $this->getTableRows();
