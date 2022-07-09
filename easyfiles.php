@@ -162,11 +162,11 @@ class EasyUpload
         return false;
     }
 
-    public function getIMG() : easyIMG|bool
+    public function getImg() : easyImg|bool
     {
         if(!$this->saved)
             return false;
-        return new easyIMG($this->getFullPath());
+        return new easyImg($this->getFullPath());
     }
 
     public function getDoc() : easyDoc|bool
@@ -228,7 +228,7 @@ class EasyUpload
     }
 }
 
-class EasyIMG
+class EasyImg
 {
     use Checks;
 
@@ -457,16 +457,9 @@ class EasyThumb
     const NOT_DIRECTORY_ERROR = "The path does not lead to a directory."; // 34
     const SAVE_ERROR = "Could not save."; // 35
 
-    public function __construct(string $prefix = "thumb-", ?string $filename = NULL, string $pathThumb, string $pathIMG, ?int $maxDimension = 100, ?int $width = NULL, ?int $height = NULL)
+    public function __construct(string $pathIMG, ?string $filename = NULL, ?int $maxDimension = 100, ?int $width = NULL, ?int $height = NULL)
     {
         $this->pathIMG = htmlentities($pathIMG);
-        $this->pathThumb = preg_replace(";\/$;", "", htmlentities($pathThumb));
-
-        if(!is_dir($this->pathThumb))
-        {
-            $this->error(self::NOT_DIRECTORY_ERROR, 34);
-            return;
-        }
 
         if(is_null($filename))
             $this->filename = pathinfo($this->pathIMG, PATHINFO_FILENAME);
@@ -474,7 +467,6 @@ class EasyThumb
             $this->filename = $filename;
 
         $this->extension = strtolower(pathinfo($this->pathIMG, PATHINFO_EXTENSION));
-        $this->filename = $prefix . $this->filename;
         
         $this->maxDimension = $maxDimension;
         $this->width = $width;
@@ -591,10 +583,20 @@ class EasyThumb
 		echo '<img id="' . $id . '" class="' . $class . '" src="data:image/png;base64,' . base64_encode($rawImageStream) . '" alt="' . $alt . '">';
     }
 
-    public function save(?string $extension = NULL) : bool
+    public function save(string $pathThumb, string $prefix = "thumb-", ?string $extension = NULL) : bool
     {
-        if(!$this->thumbMade)
+        if(!$this->thumbMade || $this->saved)
             return false;
+
+        $this->pathThumb = preg_replace(";\/$;", "", htmlentities($pathThumb));
+
+        if(!is_dir($this->pathThumb))
+        {
+            $this->error(self::NOT_DIRECTORY_ERROR, 34);
+            return false;
+        }
+        
+        $this->filename = $prefix . $this->filename;
         
         if(!is_null($extension))
             $this->extension = $extension;
