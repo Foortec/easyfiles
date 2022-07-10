@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-3.3.2-public-methods.png"/>
+<img src="media/easyfiles-4.0.0-public-methods.png"/>
 
 ## Requirements
 
@@ -197,17 +197,17 @@ public function EasyUpload::getFullPath() : string|bool
 If the file is already saved (*save()* method was successfully used), a **string** containing the path to the file is returned. Otherwise a **false** is returned.
 
 <br/><br/>
-#### getIMG()
+#### getImg()
 <br/>**Description**
 
-Returns an instance of **EasyIMG** class.
+Returns an instance of **EasyImg** class.
 
 ```php
-public function EasyUpload::getIMG() : EasyIMG|bool
+public function EasyUpload::getImg() : EasyImg|bool
 ```
 <br/>**Return values**
 
-If the file is already saved (*save()* method was successfully used), an *EasyIMG* **object** is returned. Otherwise a **false** is returned.
+If the file is already saved (*save()* method was successfully used), an *EasyImg* **object** is returned. Otherwise a **false** is returned.
 
 <br/><br/>
 #### getDoc()
@@ -317,15 +317,15 @@ The submit input's value.
 
 <br/><br/>
 
-### EasyIMG
+### EasyImg
 <br/><br/>
 #### __construct()
 <br/>**Description**
 
-Creates a new instance of the **EasyIMG** class.
+Creates a new instance of the **EasyImg** class.
 
 ```php
-public function EasyIMG::__construct(string $path)
+public function EasyImg::__construct(string $path)
 ```
 <br/>**Parameters**
 
@@ -339,7 +339,7 @@ A string containing path to the image.
 Displays image using HTML <img> tag.
 
 ```php
-public function EasyIMG::display(
+public function EasyImg::display(
   ?string $id = NULL, 
   ?string $class = NULL,
   ?string $alt = NULL
@@ -363,7 +363,7 @@ An alt text of the displayed image tag.
 Returns image path.
 
 ```php
-public function EasyIMG::getFullPath() : string
+public function EasyImg::getFullPath() : string
 ```
 <br/>**Return values**
 
@@ -376,7 +376,7 @@ A **string** containing the path to the file is returned.
 Returns an instance of *easyDoc* class.
 
 ```php
-public function EasyIMG::getThumb(
+public function EasyImg::getThumb(
   string $prefix = "thumb-",
   ?string $filename = null,
   string $pathThumb,
@@ -420,7 +420,7 @@ If *maxDimension* is not NULL, *width* and *height* must be set to NULL. If *max
 Returns basename (filename with extension) of the image.
 
 ```php
-public function EasyIMG::getBasename() : string
+public function EasyImg::getBasename() : string
 ```
 <br/>**Return values**
 
@@ -433,7 +433,7 @@ A **string** containing the basename is returned. If the basename have not been 
 Returns filename.
 
 ```php
-public function EasyIMG::getFilename() : string
+public function EasyImg::getFilename() : string
 ```
 <br/>**Return values**
 
@@ -446,7 +446,7 @@ A **string** containing the filename is returned. If the filename have not been 
 Returns extension of the image.
 
 ```php
-public function EasyIMG::getExtension() : string
+public function EasyImg::getExtension() : string
 ```
 <br/>**Return values**
 
@@ -459,7 +459,7 @@ A **string** containing the extension is returned. If the extension have not bee
 Returns size of the image in bytes.
 
 ```php
-public function EasyIMG::getSize() : int
+public function EasyImg::getSize() : int
 ```
 <br/>**Return values**
 
@@ -472,7 +472,7 @@ An **integer** size is returned (in bytes).
 Adds watermark to the image.
 
 ```php
-public EasyIMG::watermark(
+public EasyImg::watermark(
   string $watermarkImagePath,
   string $location = "center"
 ) : void
@@ -508,7 +508,7 @@ Example #1: Adding watermark and displaying results (+ errors handling)<br/>
 ```php
 <?php
 require "easyfiles.php";
-use foortec\easyfiles\EasyIMG;
+use foortec\easyfiles\EasyImg;
 
 $img = new Easyimg("imgs/picture.jpg");
 
@@ -534,28 +534,20 @@ Creates a new instance of the **EasyThumb** class.
 
 ```php
 public function EasyThumb::__construct(
-  string $prefix = "thumb-",
-  ?string $filename = null,
-  string $pathThumb,
   string $pathIMG,
+  ?string $filename = NULL,
   ?int $maxDimension = 100,
-  ?int $width = null,
-  ?int $height = null
+  ?int $width = NULL,
+  ?int $height = NULL
 )
 ```
 <br/>**Parameters**
 
-*prefix*<br/>
-Thumbnail filename prefix.<br/><br/>
+*pathIMG*<br/>
+Path to the image.<br/><br/>
 
 *filename*<br/>
 Thumbnail filename. If leaved NULL, the filename will be the same as the target image's filename.<br/><br/>
-
-*pathThumb*<br/>
-Path, where the thumbnail will be saved.<br/><br/>
-
-*pathIMG*<br/>
-Path to the image.<br/><br/>
 
 *maxDimension*<br/>
 Measurement of the longest dimension of an image (in pixels). The second dimension will be calculated according to aspect ratio.<br/><br/>
@@ -618,9 +610,19 @@ The thumbnail does not need to be saved to be displayed.
 Saves thumbnail.
 
 ```php
-public function EasyThumb::save(?string $extension = null) : bool
+public function EasyThumb::save(
+  string $pathThumb,
+  string $prefix = "thumb-",
+  ?string $extension = NULL
+) : bool
 ```
 <br/>**Parameters**
+
+*pathThumb*<br/>
+Path, where the thumbnail will be saved.<br/><br/>
+
+*prefix*<br/>
+Thumbnail filename prefix.<br/><br/>
 
 *extension*<br/>
 Output thumbnail extension.<br/><br/>
