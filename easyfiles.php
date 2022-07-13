@@ -244,6 +244,7 @@ class EasyImg
     const NO_FILE_ERROR = "No such file, path invalid, or permission denied."; // 21
     const WATERMARK_BAD_LOCATION_ERROR = "Unknown watermark location."; // 22
     const IMAGE_CREATE_ERROR = "Could not create an image."; // 23
+    const FILTER_ERROR = "Could not apply filter to an image."; // 24
 
     const WATERMARK_LOCATIONS = ["top", "top-right", "right", "bottom-right", "bottom", "bottom-left", "left", "top-left", "center", "random"];
 
@@ -392,6 +393,40 @@ class EasyImg
 
         imagedestroy($watermark);
         imagedestroy($image);
+    }
+
+    public function filter(int $filter, int $arg, int|bool $arg2 = false, int|array $arg3 = -1, int $arg4 = 0) : void
+    {
+        if($this->error)
+            return;
+
+        $image = $this->imageToGdImage($this->path);
+        if($this->error)
+            return;
+
+        if($filter == IMG_FILTER_COLORIZE)
+        {
+            if(!imagefilter($image, $filter, $arg, $arg2, $arg3, $arg4))
+                $this->error(self::FILTER_ERROR, 24);
+            return;
+        }
+        
+        if($filter == IMG_FILTER_SCATTER)
+        {
+            if(!imagefilter($image, $filter, $arg, $arg2, $arg3))
+                $this->error(self::FILTER_ERROR, 24);
+            return;
+        }
+
+        if($filter == IMG_FILTER_PIXELATE)
+        {
+            if(!imagefilter($image, $filter, $arg, $arg2))
+                $this->error(self::FILTER_ERROR, 24);
+            return;
+        }
+
+        if(!imagefilter($image, $filter, $arg))
+            $this->error(self::FILTER_ERROR, 24);
     }
 
     public function getFullPath() : string
