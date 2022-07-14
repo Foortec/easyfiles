@@ -295,6 +295,26 @@ class EasyImg
         return $function_imagecreatefrom($pathToImage);
     }
 
+    private function saveGdImage(?GdImage $image = NULL) : bool
+    {
+        if($image == NULL)
+            $image = $this->imageToGdImage($this->path);
+
+        if(is_bool($image))
+            return false;
+
+        if(!($mime = explode("/", mime_content_type($this->path))))
+        {
+            $this->error();
+            return false;
+        }
+        $ext = strtolower($mime[1]);
+        $function_image = "image" . $ext;
+
+        unlink($this->path);
+        return $function_image($image, $this->path);
+    }
+
     private function calcDstCoordinates(int $dst_width, int $dst_height, int $src_width, int $src_height, string $location) : array
     {
         if($location == "top")
@@ -379,23 +399,17 @@ class EasyImg
 
         imagecopy($image, $watermark, $dst_x, $dst_y, $src_x, $src_y, $src_width, $src_height);
 
-        if(!($mime = explode("/", mime_content_type($this->path))))
+        if(!$this->saveGdImage($image))
         {
             $this->error();
             return;
         }
-        $ext = strtolower($mime[1]);
-        if($ext == "jpg")
-            $ext = "jpeg";
-        $function_image = "image" . $ext;
-        
-        $function_image($image, $this->path);
 
         imagedestroy($watermark);
         imagedestroy($image);
     }
 
-    public function filter(int $filter, int $arg, int|bool $arg2 = false, int|array $arg3 = -1, int $arg4 = 0) : void
+    public function filter(int $filter, ?int $arg = NULL, int|bool $arg2 = false, array|int $arg3 = -1, int $arg4 = 0) : void
     {
         if($this->error)
             return;
@@ -407,26 +421,64 @@ class EasyImg
         if($filter == IMG_FILTER_COLORIZE)
         {
             if(!imagefilter($image, $filter, $arg, $arg2, $arg3, $arg4))
+            {
                 $this->error(self::FILTER_ERROR, 24);
+                return;
+            }
+
+            if(!$this->saveGdImage($image))
+                $this->error();
             return;
         }
         
         if($filter == IMG_FILTER_SCATTER)
         {
-            if(!imagefilter($image, $filter, $arg, $arg2, $arg3))
+            if(is_bool($arg2))
+                $arg2 = $arg + 1;
+
+            if(!is_int($arg3) && !imagefilter($image, $filter, $arg, $arg2, $arg3))
+            {
                 $this->error(self::FILTER_ERROR, 24);
+                return;
+            }
+
+            if(is_int($arg3) && !imagefilter($image, $filter, $arg, $arg2))
+            {
+                $this->error(self::FILTER_ERROR, 24);
+                return;
+            }
+
+            if(!$this->saveGdImage($image))
+                $this->error();
             return;
         }
 
         if($filter == IMG_FILTER_PIXELATE)
         {
             if(!imagefilter($image, $filter, $arg, $arg2))
+            {
                 $this->error(self::FILTER_ERROR, 24);
+                return;
+            }
+
+            if(!$this->saveGdImage($image))
+                $this->error();
             return;
         }
 
-        if(!imagefilter($image, $filter, $arg))
+        if($arg == NULL && !imagefilter($image, $filter))
+        {
             $this->error(self::FILTER_ERROR, 24);
+            return;
+        }
+        elseif(!imagefilter($image, $filter, $arg))
+        {
+            $this->error(self::FILTER_ERROR, 24);
+            return;
+        }
+
+        if(!$this->saveGdImage($image))
+            $this->error();
     }
 
     public function getFullPath() : string
