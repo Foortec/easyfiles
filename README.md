@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-4.0.0-public-methods.png"/>
+<img src="media/easyfiles-4.1.1-public-methods.png"/>
 
 ## Requirements
 
@@ -524,6 +524,38 @@ $img->display();
 ```
 
 <br/><br/>
+#### filter()
+<br/>**Description**
+
+Applies filter to an image. Uses Gdlib's [imagefilter](https://www.php.net/manual/en/function.imagefilter) function.
+
+```php
+public function filter(
+  int $filter,
+  ?int $arg = NULL,
+  int|bool $arg2 = false,
+  array|int $arg3 = -1,
+  int $arg4 = 0
+) : void
+```
+<br/>**Parameters**
+
+*filter*<br/>
+One of the [filter constants](https://www.php.net/manual/en/function.imagefilter.php#refsect1-function.imagefilter-parameters).<br/><br/>
+
+*arg*<br/>
+Firts argument, depending on the selected filter. Null by default.<br/><br/>
+
+*arg2*<br/>
+Second argument, depending on the selected filter. False by default.<br/><br/>
+
+*arg3*<br/>
+Third argument, depending on the selected filter. -1 by default.<br/><br/>
+
+*arg4*<br/>
+Fourth argument, depending on the selected filter. 0 by default.
+
+<br/><br/>
 
 ### EasyThumb
 <br/><br/>
@@ -989,4 +1021,5 @@ echo $object->error? $object->errorCode . ": " . $object->errorMessage : "Everyt
 
 ### Exceptions
 
-Some methods throw Exceptions. This is mainly for database-connecting methods (*easyMigrate* class).<br/>
+Some methods throw Exceptions. This is mainly for database-connecting methods (*EasyMigrate* class).<br/>
+However, the EasyImg::filter() method throws exceptions if you supply an undefined constant or too few / many arguments.
