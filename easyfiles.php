@@ -783,12 +783,65 @@ class EasyDoc
         $this->errorCode = $code;
     }
 
+    public function displayFormatted() : void
+    {
+        if($this->error)
+            return;
+
+        if($this->extension == "xml")
+        {
+            $this->displayFormattedXML();
+            return;
+        }
+        
+        if($this->extension == "json")
+        {
+            $this->displayFormattedJSON();
+            return;
+        }
+        
+        if($this->extension == "csv")
+        {
+            $this->displayFormattedCSV();
+            return;
+        }
+        
+        $this->displayFormattedTXT();
+    }
+
+    private function displayFormattedXML() : void
+    {
+        echo '<pre>';
+        $this->displayRawXML();
+        echo '</pre>';
+    }
+
+    private function displayFormattedJSON() : void
+    {
+        echo '<pre>';
+        $this->displayRawJSON();
+        echo '</pre>';
+    }
+
+    private function displayFormattedCSV() : void
+    {
+        echo '<pre>';
+        $this->displayRawCSV();
+        echo '</pre>';
+    }
+
+    private function displayFormattedTXT() : void
+    {
+        echo '<pre>';
+        $this->displayRawTXT();
+        echo '</pre>';
+    }
+
     public function displayRaw() : void
     {
         if($this->error)
             return;
 
-        echo "<pre>";
         if($this->extension == "xml")
         {
             $this->displayRawXML();
@@ -808,7 +861,6 @@ class EasyDoc
         }
         
         $this->displayRawTXT();
-        echo "</pre>";
     }
 
     private function displayrawCSV() : void
