@@ -741,6 +741,7 @@ class EasyDoc
     private string $extension;
     private string $basename;
     private string $filename;
+    private array $xmlContents;
 
     public bool $error = false;
     public ?string $errorMessage = NULL;
@@ -783,6 +784,80 @@ class EasyDoc
         $this->errorCode = $code;
     }
 
+    public function getContents() : array
+    {
+        if($this->error)
+            return [];
+
+        if($this->extension == "xml")
+            return $this->getContentsXML();
+        
+        if($this->extension == "json")
+            return $this->getContentsJSON();
+        
+        if($this->extension == "csv")
+            return $this->getContentsCSV();
+        
+        return $this->getContentsTXT();
+    }
+
+    private function getContentsXML() : array
+    {
+        $parser = xml_parser_create();
+        xml_set_element_handler($parser, [$this, "xmlStart"], [$this, "xmlEnd"]);
+
+        $file = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
+        while(!feof($file))
+        {
+            $line = fgets($file);
+            xml_parse($parser, $line) or $this->error("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
+        }
+        fclose($file);
+        xml_parser_free($parser);
+        return $this->xmlContents;
+    }
+
+    private function xmlStart(XMLParser $parser, string $elemName, array $elemAttrs) : void
+    {
+        if(!empty($elemAttrs))
+            $this->xmlContents[$elemName][] = $elemAttrs;
+    }
+
+    private function xmlEnd(XMLParser $parser, string $elemName) : void
+    {
+        return;
+    }
+
+    private function getContentsJSON() : array
+    {
+        $file = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
+        $json = fread($file, filesize($this->path));
+        fclose($file);
+        return json_decode($json, true);
+    }
+
+    private function getContentsCSV() : array
+    {
+        $csv = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
+        $contents = [];
+        $iter = 0;
+        while($line = fgetcsv($csv))
+        {
+            $contents[$iter] = $line;
+            $iter++;
+        }
+        fclose($csv);
+        return $contents;
+    }
+
+    private function getContentsTXT() : array
+    {
+        $txtHandle = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
+        $txtArray = explode("/r/n", fread($txtHandle, filesize($this->path)));
+        fclose($txtHandle);
+        return $txtArray;
+    }
+
     public function displayFormatted() : void
     {
         if($this->error)
@@ -812,29 +887,42 @@ class EasyDoc
     private function displayFormattedXML() : void
     {
         echo '<pre>';
-        $this->displayRawXML();
+        var_dump($this->getContentsXML());
         echo '</pre>';
     }
 
     private function displayFormattedJSON() : void
     {
-        echo '<pre>';
-        $this->displayRawJSON();
-        echo '</pre>';
+        $array = $this->getContentsJSON();
+        foreach($array as $key => $array)
+        {
+            foreach($array as $key => $value)
+                echo $key . " => " . $value . "<br/>";
+            echo "<br/>";
+        }
     }
 
     private function displayFormattedCSV() : void
     {
-        echo '<pre>';
-        $this->displayRawCSV();
-        echo '</pre>';
+        $csv = $this->getContentsCSV();
+        foreach($csv as $line)
+        {
+            foreach($line as $cell)
+            {
+                if($cell == "")
+                    echo "-", "  ";
+                else
+                    echo $cell . "  ";
+            }
+            echo "<br/>";
+        }
     }
 
     private function displayFormattedTXT() : void
     {
-        echo '<pre>';
-        $this->displayRawTXT();
-        echo '</pre>';
+        $txtArray = $this->getContentsTXT();
+        foreach($txtArray as $line)
+            echo $line . "<br/>";
     }
 
     public function displayRaw() : void
@@ -863,78 +951,24 @@ class EasyDoc
         $this->displayRawTXT();
     }
 
-    private function displayrawCSV() : void
+    private function displayRawCSV() : void
     {
-        $csv = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
-        while($line = fgetcsv($csv))
-        {
-            foreach($line as $cell)
-            {
-                if($cell == "")
-                    echo "-", "  ";
-                else
-                    echo $cell . "  ";
-            }
-            echo "<br/>";
-        }
-        fclose($csv);
+        var_dump($this->getContentsCSV());
     }
 
     private function displayRawJSON() : void
     {
-        $file = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
-        $json = fread($file, filesize($this->path));
-        fclose($file);
-        $array = json_decode($json, true);
-        foreach($array as $key => $array)
-        {
-            foreach($array as $key => $value)
-                echo $key . " => " . $value . "<br/>";
-            echo "<br/>";
-        }
+        var_dump($this->getContentsJSON());
     }
 
     private function displayRawTXT() : void
     {
-        $txtHandle = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
-        $txtArray = explode("/r/n", fread($txtHandle, filesize($this->path)));
-        fclose($txtHandle);
-        foreach($txtArray as $line)
-            echo $line . "<br/>";
-    }
-
-    private function xmlStart(XMLParser $parser, string $elemName, array $elemAttrs) : void
-    {
-        echo $elemName;
-        if(!empty($elemAttrs))
-        {
-            echo " ( ";
-            foreach($elemAttrs as $attr => $value)
-                echo $attr . "='" . $value . "' ";
-            echo ")";
-            return;
-        }
-        echo "<br/>";
-    }
-
-    private function xmlEnd(XMLParser $parser, string $elemName) : void
-    {
-        echo "<br/>";
+        var_dump($this->getContentsTXT());
     }
 
     private function displayRawXML() : void
     {
-        $parser = xml_parser_create();
-        xml_set_element_handler($parser, [$this, "xmlStart"], [$this, "xmlEnd"]);
-
-        $file = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
-        while(!feof($file))
-        {
-            $line = fgets($file);
-            xml_parse($parser, $line) or $this->error("XML parser error string: " . xml_error_string(xml_get_error_code($parser)) . " at line " . xml_get_current_line_number($parser));
-        }
-        fclose($file);
-        xml_parser_free($parser);
+        var_dump($this->getContentsXML());
     }
 
     public function getMigrate(string $tableName, string $hostname = MYSQLI_HOSTNAME, string $username = MYSQLI_USERNAME, string $password = MYSQLI_PASSWORD, string $database = MYSQLI_DATABASE, string $port = MYSQLI_PORT, string $socket = MYSQLI_SOCKET) : easyMigrate
