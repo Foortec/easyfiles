@@ -853,45 +853,61 @@ class EasyDoc
     private function getContentsTXT() : array
     {
         $txtHandle = fopen($this->path, "r") or $this->error(self::FILE_READ_ERROR, 43);
-        $txtArray = explode("/r/n", fread($txtHandle, filesize($this->path)));
+        $txtArray = explode("\n", fread($txtHandle, filesize($this->path)));
         fclose($txtHandle);
         return $txtArray;
     }
 
-    public function displayFormatted() : void
+    public function displayFormatted(bool $asTable = false) : void
     {
         if($this->error)
             return;
 
         if($this->extension == "xml")
         {
-            $this->displayFormattedXML();
+            $this->displayFormattedXML($asTable);
             return;
         }
         
         if($this->extension == "json")
         {
-            $this->displayFormattedJSON();
+            $this->displayFormattedJSON($asTable);
             return;
         }
         
         if($this->extension == "csv")
         {
-            $this->displayFormattedCSV();
+            $this->displayFormattedCSV($asTable);
             return;
         }
         
-        $this->displayFormattedTXT();
+        $this->displayFormattedTXT($asTable);
     }
 
-    private function displayFormattedXML() : void
+    private function displayFormattedXML(bool $asTable) : void
     {
-        echo '<pre>';
-        var_dump($this->getContentsXML());
+        $contents = $this->getContentsXML();
+
+        if(!$asTable)
+        {
+            echo '<pre>';
+            var_dump($contents);
+            echo '</pre>';
+            return;
+        }
+        echo count($contents["COL"]) . '<pre>';
+        var_dump($contents["COL"]);
         echo '</pre>';
+
+        echo '<table border="1px">';
+        echo '<tr>';
+        for($i=0; $i<count($contents["COL"]); ++$i)
+            echo '<td>' . $contents["COL"][$i]["NAME"] . '</td>';
+        echo '</tr>';
+        echo '</table>';
     }
 
-    private function displayFormattedJSON() : void
+    private function displayFormattedJSON(bool $asTable) : void
     {
         $array = $this->getContentsJSON();
         foreach($array as $key => $array)
@@ -902,7 +918,7 @@ class EasyDoc
         }
     }
 
-    private function displayFormattedCSV() : void
+    private function displayFormattedCSV(bool $asTable) : void
     {
         $csv = $this->getContentsCSV();
         foreach($csv as $line)
@@ -918,7 +934,7 @@ class EasyDoc
         }
     }
 
-    private function displayFormattedTXT() : void
+    private function displayFormattedTXT(bool $asTable) : void
     {
         $txtArray = $this->getContentsTXT();
         foreach($txtArray as $line)
