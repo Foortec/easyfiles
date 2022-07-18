@@ -2,7 +2,7 @@
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
-<img src="media/easyfiles-4.1.1-public-methods.png"/>
+<img src="media/easyfiles-4.3.2-public-methods.png"/>
 
 ## Requirements
 
@@ -741,6 +741,34 @@ public function EasyDoc::__construct(string $path)
 
 *path*<br/>
 Path to the document.
+
+<br/><br/>
+#### getContents()
+<br/>**Description**
+
+Returns contents of the file.<br/>
+
+```php
+public function getContents() : array
+```
+
+<br/><br/>
+#### displayFormatted()
+<br/>**Description**
+
+Displays formatted content of the file.<br/>
+If nothing is display, it is propably because of an error or the file is empty.
+
+```php
+public function displayFormatted(
+  bool $asTable = false
+) : void
+```
+
+<br/>**Parameters**
+
+*asTable*<br/>
+Works only with XML data files. If true, displays data as table.
 
 <br/><br/>
 #### displayRaw()
