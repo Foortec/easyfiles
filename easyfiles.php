@@ -814,7 +814,9 @@ class EasyDoc
         }
         fclose($file);
         xml_parser_free($parser);
-        return $this->xmlContents;
+        $contents = $this->xmlContents;
+        unset($this->xmlContents);
+        return $contents;
     }
 
     private function xmlStart(XMLParser $parser, string $elemName, array $elemAttrs) : void
@@ -871,17 +873,17 @@ class EasyDoc
         
         if($this->extension == "json")
         {
-            $this->displayFormattedJSON($asTable);
+            $this->displayFormattedJSON();
             return;
         }
         
         if($this->extension == "csv")
         {
-            $this->displayFormattedCSV($asTable);
+            $this->displayFormattedCSV();
             return;
         }
         
-        $this->displayFormattedTXT($asTable);
+        $this->displayFormattedTXT();
     }
 
     private function displayFormattedXML(bool $asTable) : void
@@ -895,19 +897,23 @@ class EasyDoc
             echo '</pre>';
             return;
         }
-        echo count($contents["COL"]) . '<pre>';
-        var_dump($contents["COL"]);
-        echo '</pre>';
 
-        echo '<table border="1px">';
+        echo '<table>';
         echo '<tr>';
         for($i=0; $i<count($contents["COL"]); ++$i)
-            echo '<td>' . $contents["COL"][$i]["NAME"] . '</td>';
+            echo '<th>' . $contents["COL"][$i]["NAME"] . '</th>';
         echo '</tr>';
+        for($i=0; $i<count($contents["ROW"]); ++$i)
+        {
+            echo '<tr>';
+            foreach($contents["ROW"][$i] as $cell)
+                echo '<td>' . $cell . '</td>';
+            echo '</tr>';
+        }
         echo '</table>';
     }
 
-    private function displayFormattedJSON(bool $asTable) : void
+    private function displayFormattedJSON() : void
     {
         $array = $this->getContentsJSON();
         foreach($array as $key => $array)
@@ -918,7 +924,7 @@ class EasyDoc
         }
     }
 
-    private function displayFormattedCSV(bool $asTable) : void
+    private function displayFormattedCSV() : void
     {
         $csv = $this->getContentsCSV();
         foreach($csv as $line)
@@ -928,13 +934,13 @@ class EasyDoc
                 if($cell == "")
                     echo "-", "  ";
                 else
-                    echo $cell . "  ";
+                    echo $cell;
             }
             echo "<br/>";
         }
     }
 
-    private function displayFormattedTXT(bool $asTable) : void
+    private function displayFormattedTXT() : void
     {
         $txtArray = $this->getContentsTXT();
         foreach($txtArray as $line)
