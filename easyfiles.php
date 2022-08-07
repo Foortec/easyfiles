@@ -873,17 +873,17 @@ class EasyDoc
         
         if($this->extension == "json")
         {
-            $this->displayFormattedJSON();
+            $this->displayFormattedJSON($asTable);
             return;
         }
         
         if($this->extension == "csv")
         {
-            $this->displayFormattedCSV();
+            $this->displayFormattedCSV($asTable);
             return;
         }
         
-        $this->displayFormattedTXT();
+        $this->displayFormattedTXT($asTable);
     }
 
     private function displayFormattedXML(bool $asTable) : void
@@ -913,38 +913,84 @@ class EasyDoc
         echo '</table>';
     }
 
-    private function displayFormattedJSON() : void
+    private function displayFormattedJSON(bool $asTable) : void
     {
         $array = $this->getContentsJSON();
+
+        if(!$asTable)
+        {
+            foreach($array as $key => $array)
+            {
+                foreach($array as $key => $value)
+                    echo $key . " => " . $value . "<br/>";
+                echo "<br/>";
+            }
+            return;
+        }
+
+        echo '<table>';
+        echo '<tr> <th>Key</th> <th>Value</th> </tr>';
         foreach($array as $key => $array)
         {
             foreach($array as $key => $value)
-                echo $key . " => " . $value . "<br/>";
-            echo "<br/>";
+                echo '<tr> <td>' . $key . '</td> <td>' . $value . '</td> </tr>';
         }
+        echo '</table>';
     }
 
-    private function displayFormattedCSV() : void
+    private function displayFormattedCSV(bool $asTable) : void
     {
         $csv = $this->getContentsCSV();
+
+        if(!$asTable)
+        {
+            foreach($csv as $line)
+            {
+                foreach($line as $cell)
+                {
+                    if($cell == "")
+                        echo "-", "  ";
+                    else
+                        echo $cell;
+                }
+                echo "<br/>";
+            }
+            return;
+        }
+
+        $iter = 0;
+        echo '<table>';
         foreach($csv as $line)
         {
+            echo '<tr>';
             foreach($line as $cell)
             {
-                if($cell == "")
-                    echo "-", "  ";
+                if($iter == 0)
+                    echo '<th>' . $cell . '</th>';
                 else
-                    echo $cell;
+                    echo '<td>' . $cell . '</td>';
             }
-            echo "<br/>";
+            echo '</tr>';
+            $iter++;
         }
+        echo '</table>';
     }
 
-    private function displayFormattedTXT() : void
+    private function displayFormattedTXT(bool $asTable) : void
     {
         $txtArray = $this->getContentsTXT();
+
+        if(!$asTable)
+        {
+            foreach($txtArray as $line)
+                echo $line . "<br/>";
+            return;
+        }
+
+        echo '<table>';
         foreach($txtArray as $line)
-            echo $line . "<br/>";
+            echo '<tr> <td>' . $line . '</td> </tr>';
+        echo '</table>';
     }
 
     public function displayRaw() : void
