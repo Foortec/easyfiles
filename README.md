@@ -1,4 +1,9 @@
 # EasyFiles
+
+[![License](https://img.shields.io/github/license/foortec/easyfiles?style=for-the-badge)](https://github.com/Foortec/easyfiles)
+[![Code size](https://img.shields.io/github/languages/code-size/foortec/easyfiles?style=for-the-badge)](https://github.com/Foortec/easyfiles)
+[![Commit activity](https://img.shields.io/github/commit-activity/y/foortec/easyfiles?style=for-the-badge)](https://github.com/Foortec/easyfiles)
+
 A set of classes designed to help you upload images and documents, display them, create thumbnails (from images), import / export documents to / from database. More features soon (like watermarks and more customization options).
 
 *A quick overview*
