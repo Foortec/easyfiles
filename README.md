@@ -378,7 +378,7 @@ A **string** containing the path to the file is returned.
 #### getThumb()
 <br/>**Description**
 
-Returns an instance of *easyDoc* class.
+Returns an instance of *easyThumb* class.
 
 ```php
 public function EasyImg::getThumb(
